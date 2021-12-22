@@ -12,12 +12,14 @@ from point import Point
 
 
 class Detail:
-    def __init__(self, vertices, edges, offset, name):
+    def __init__(self, vertices, edges, offset, name, eccentric=True):
         self.vertices = vertices
         self.edges = edges
         self.name = name
 
         self.colors = config.CubeConfig().get_center_colors()
+        if eccentric:
+            self.sides = config.CubeConfig().get_eccentric_detail_sides()
 
         self.move(offset)
         self.move(config.Config().center)
@@ -61,62 +63,8 @@ class Detail:
         for vertex in self.vertices.values():
             vertex.turn_oz_funcs(sin_angle, cos_angle)
 
-    def draw(self, painter, visible_sides):
-        tmp = set(visible_sides) & set(self.name)
-        for key, edge in self.edges.items():
-            # if set(visible_sides) & set(key):
-            if tmp & set(key):
-                start, finish = self.vertices[edge.first], self.vertices[edge.second]
-                painter.create_line(start.x, start.y, finish.x, finish.y)
-
     def set_name(self, name):
         self.name = name
-
-
-class Corner(Detail):
-    def __init__(self, vertices, edges, offset, name):
-        super().__init__(vertices, edges, offset, name)
-        self.sides = config.CubeConfig().get_eccentric_detail_sides()
-
-    def update_sides(self, side, direction):
-        exchange = config.CubeConfig().get_exchanges_centers()[side]
-
-        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
-        saved_ind = -1 if direction > 0 else 0
-
-        tmp = self.sides[exchange[saved_ind]]
-        for i in dir_range:
-            i_to = exchange[i + direction]
-            i_from = exchange[i]
-            self.sides[i_to] = self.sides[i_from]
-        self.sides[exchange[saved_ind + direction]] = tmp
-
-    def draw(self, painter, visible_sides):
-        for side in visible_sides:
-            if side in self.name:
-                for key in self.sides[side]:
-                    edge = self.edges[key]
-                    start, finish = self.vertices[edge.first], self.vertices[edge.second]
-                    painter.create_line(start.x, start.y, finish.x, finish.y)
-
-
-class Rib(Detail):
-    def __init__(self, vertices, edges, offset, name):
-        super().__init__(vertices, edges, offset, name)
-        self.sides = config.CubeConfig().get_eccentric_detail_sides()
-
-    def update_sides(self, side, direction):
-        exchange = config.CubeConfig().get_exchanges_centers()[side]
-
-        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
-        saved_ind = -1 if direction > 0 else 0
-
-        tmp = self.sides[exchange[saved_ind]]
-        for i in dir_range:
-            i_to = exchange[i + direction]
-            i_from = exchange[i]
-            self.sides[i_to] = self.sides[i_from]
-        self.sides[exchange[saved_ind + direction]] = tmp
 
     def fill_detail(self, painter, vertices, side):
         painter.setBrush(QBrush(QColor(self.colors[side]), Qt.SolidPattern))
@@ -150,12 +98,48 @@ class Rib(Detail):
                 self.fill_detail(painter, vertices, side)
 
 
+class Corner(Detail):
+    def __init__(self, vertices, edges, offset, name):
+        super().__init__(vertices, edges, offset, name)
+
+    def update_sides(self, side, direction):
+        exchange = config.CubeConfig().get_exchanges_centers()[side]
+
+        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
+        saved_ind = -1 if direction > 0 else 0
+
+        tmp = self.sides[exchange[saved_ind]]
+        for i in dir_range:
+            i_to = exchange[i + direction]
+            i_from = exchange[i]
+            self.sides[i_to] = self.sides[i_from]
+        self.sides[exchange[saved_ind + direction]] = tmp
+        
+
+class Rib(Detail):
+    def __init__(self, vertices, edges, offset, name):
+        super().__init__(vertices, edges, offset, name)
+
+    def update_sides(self, side, direction):
+        exchange = config.CubeConfig().get_exchanges_centers()[side]
+
+        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
+        saved_ind = -1 if direction > 0 else 0
+
+        tmp = self.sides[exchange[saved_ind]]
+        for i in dir_range:
+            i_to = exchange[i + direction]
+            i_from = exchange[i]
+            self.sides[i_to] = self.sides[i_from]
+        self.sides[exchange[saved_ind + direction]] = tmp
+
+
 class Center(Detail):
     def __init__(self, vertices, edges, offset, name):
         super().__init__(vertices, edges, offset, name)
         self.color = self.colors[name]
 
-    def fill_detail(self, painter):
+    def fill_detail(self, painter, vertices=None, side=None):
         painter.setBrush(QBrush(QColor(self.color), Qt.SolidPattern))
         painter.fill(self.vertices.values())
 
