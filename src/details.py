@@ -3,7 +3,7 @@ from PyQt5.QtGui import QPen, QColor, QBrush
 
 import config
 from copy import deepcopy
-from mymath import find_by_key, add_repeats
+from mymath import find_by_key, add_repeats, get_vertices_by_pairs
 from point import Point
 
 
@@ -15,8 +15,10 @@ class Detail:
     def __init__(self, vertices, edges, offset, name, eccentric=True):
         self.vertices = vertices
         self.edges = edges
-        self.name = name
-
+        self.name = None
+        self.set_name(name)
+        self.name_for_color = list(name)
+        # self.name_to_color.sort()
         self.colors = config.CubeConfig().get_center_colors()
         if eccentric:
             self.sides = config.CubeConfig().get_eccentric_detail_sides()
@@ -64,7 +66,30 @@ class Detail:
             vertex.turn_oz_funcs(sin_angle, cos_angle)
 
     def set_name(self, name):
-        self.name = name
+        self.name = list(name)
+        # self.name.sort()
+
+    def update_sides(self, side, direction):
+        exchange = config.CubeConfig().get_exchanges_centers()[side]
+
+        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
+        saved_ind = -1 if direction > 0 else 0
+
+        tmp = self.sides[exchange[saved_ind]]
+        for i in dir_range:
+            i_to = exchange[i + direction]
+            i_from = exchange[i]
+            self.sides[i_to] = self.sides[i_from]
+        self.sides[exchange[saved_ind + direction]] = tmp
+
+        print('============================')
+        print('====BEFORE====')
+        print(f'{self.name = }, {self.name_for_color = }')
+        if self.name[0] != self.name_for_color[0] and self.name[1] != self.name_for_color[1]:
+            self.name[0], self.name[1] = self.name[1], self.name[0]
+        print('====AFTER=====')
+        print(f'{self.name = }, {self.name_for_color = }')
+        print('============================')
 
     def fill_detail(self, painter, vertices, side):
         painter.setBrush(QBrush(QColor(self.colors[side]), Qt.SolidPattern))
@@ -78,60 +103,29 @@ class Detail:
                     edge = self.edges[key]
                     start, finish = self.vertices[edge.first], self.vertices[edge.second]
                     vertices_pairs.append([start, finish])
-                    painter.create_line(start.x, start.y, finish.x, finish.y)
+                    # print(key)
+                    # painter.create_line(start.x, start.y, finish.x, finish.y)
 
-                vertices = [*vertices_pairs[0]]
-                del vertices_pairs[0]
-                i = 1
-                while vertices_pairs:
-                    for j in range(0, len(vertices_pairs)):
-                        if vertices[i] == vertices_pairs[j][0]:
-                            vertices.append(vertices_pairs[j][1])
-                            i += 1
-                            del vertices_pairs[j]
-                            break
-                        elif vertices[i] == vertices_pairs[j][1]:
-                            vertices.append(vertices_pairs[j][0])
-                            i += 1
-                            del vertices_pairs[j]
-                            break
-                self.fill_detail(painter, vertices, side)
+                vertices = get_vertices_by_pairs(vertices_pairs)
+                # print(f'{side = }')
+                # if side == 'U':
+                #     print(f'{self.name = }')
+                #     print(f'{self.name_for_color = }')
+
+                # print(self.name)
+                # print(self.name_to_color)
+                # print('-' * 10)
+                self.fill_detail(painter, vertices, self.name_for_color[self.name.index(side)])
 
 
 class Corner(Detail):
     def __init__(self, vertices, edges, offset, name):
         super().__init__(vertices, edges, offset, name)
 
-    def update_sides(self, side, direction):
-        exchange = config.CubeConfig().get_exchanges_centers()[side]
-
-        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
-        saved_ind = -1 if direction > 0 else 0
-
-        tmp = self.sides[exchange[saved_ind]]
-        for i in dir_range:
-            i_to = exchange[i + direction]
-            i_from = exchange[i]
-            self.sides[i_to] = self.sides[i_from]
-        self.sides[exchange[saved_ind + direction]] = tmp
-        
 
 class Rib(Detail):
     def __init__(self, vertices, edges, offset, name):
         super().__init__(vertices, edges, offset, name)
-
-    def update_sides(self, side, direction):
-        exchange = config.CubeConfig().get_exchanges_centers()[side]
-
-        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
-        saved_ind = -1 if direction > 0 else 0
-
-        tmp = self.sides[exchange[saved_ind]]
-        for i in dir_range:
-            i_to = exchange[i + direction]
-            i_from = exchange[i]
-            self.sides[i_to] = self.sides[i_from]
-        self.sides[exchange[saved_ind + direction]] = tmp
 
 
 class Center(Detail):
@@ -144,9 +138,9 @@ class Center(Detail):
         painter.fill(self.vertices.values())
 
     def draw(self, painter, visible_sides=None):
-        for edge in self.edges:
-            start, finish = self.vertices[edge.first], self.vertices[edge.second]
-            painter.create_line(start.x, start.y, finish.x, finish.y)
+        # for edge in self.edges:
+        # start, finish = self.vertices[edge.first], self.vertices[edge.second]
+        # painter.create_line(start.x, start.y, finish.x, finish.y)
         self.fill_detail(painter)
 
 
@@ -423,4 +417,3 @@ class Centers:
             if name in key:
                 for rib in self.centers[key]:
                     rib.turn_oy(angle)
-

@@ -115,3 +115,22 @@ def find_y_min_max(vertices):
     y_min, y_max = min(y_list), max(y_list)
 
     return y_min, y_max
+
+
+def get_vertices_by_pairs(vertices_pairs):
+    vertices = [*vertices_pairs[0]]
+    del vertices_pairs[0]
+    i = 1
+    while vertices_pairs:
+        for j in range(0, len(vertices_pairs)):
+            if vertices[i] == vertices_pairs[j][0]:
+                vertices.append(vertices_pairs[j][1])
+                i += 1
+                del vertices_pairs[j]
+                break
+            elif vertices[i] == vertices_pairs[j][1]:
+                vertices.append(vertices_pairs[j][0])
+                i += 1
+                del vertices_pairs[j]
+                break
+    return vertices
