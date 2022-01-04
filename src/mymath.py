@@ -134,3 +134,21 @@ def get_vertices_by_pairs(vertices_pairs):
                 del vertices_pairs[j]
                 break
     return vertices
+
+
+def replace_list(src_list, old, new):
+    new_iter = iter(new)
+    return [x if x not in old else next(new_iter) for x in src_list]
+
+
+def reverse_replace_list(src_list, old, new, const):
+    # tmp = [x if x  old else new for x in src_list]
+    tmp = replace_list(src_list, old, new)
+    if tmp.index(const) == 0:
+        tmp[1], tmp[2] = tmp[2], tmp[1]
+    elif tmp.index(const) == 1:
+        tmp[0], tmp[2] = tmp[2], tmp[0]
+    else:
+        tmp[0], tmp[1] = tmp[1], tmp[0]
+
+    return tmp

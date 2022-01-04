@@ -3,7 +3,7 @@ from PyQt5.QtGui import QPen, QColor, QBrush
 
 import config
 from copy import deepcopy
-from mymath import find_by_key, add_repeats, get_vertices_by_pairs
+from mymath import find_by_key, add_repeats, get_vertices_by_pairs, replace_list, reverse_replace_list
 from point import Point
 
 
@@ -16,6 +16,7 @@ class Detail:
         self.vertices = vertices
         self.edges = edges
         self.name = None
+        self.prev_name = None
         self.set_name(name)
         self.name_for_color = list(name)
         # self.name_to_color.sort()
@@ -66,6 +67,7 @@ class Detail:
             vertex.turn_oz_funcs(sin_angle, cos_angle)
 
     def set_name(self, name):
+        self.prev_name = self.name
         self.name = list(name)
         # self.name.sort()
 
@@ -82,6 +84,35 @@ class Detail:
             self.sides[i_to] = self.sides[i_from]
         self.sides[exchange[saved_ind + direction]] = tmp
 
+        # print(self.sides)
+        # print('------')
+        # print(self.name, self.name_for_color)
+        # print(f'{self.name = }, {self.name_for_color = }')
+        set_name = set(self.name)
+        set_prev_name = set(self.prev_name)
+        # if set_name != set_name_for_color:
+        old_letter = list(set_prev_name - set_name)
+        new_letter = list(set_name - set_prev_name)
+
+        # changed_letter = list(set(self.name_for_color) - set(self.name))
+        # print(f'{old_letter = }, {new_letter = }')
+        # print(changed_letter)
+        # self.name = self.name_for_color[:-1] + changed_letter
+
+        if len(self.name) == 2:
+            self.name = replace_list(self.prev_name, old_letter, new_letter)
+        else:
+            self.name = reverse_replace_list(self.prev_name, old_letter, new_letter, side)
+            # self.name.reverse()
+            # self.name = reverse_replace_list(self.name_for_color, old_letter, new_letter)
+        # if set_name == set_name_for_color:
+        #    self.name = self.name_for_color
+        # print(self.name, self.name_for_color)
+
+        # print('------')
+        # else:
+            # self.name = self.name_for_color
+        '''
         print('============================')
         print('====BEFORE====')
         print(f'{self.name = }, {self.name_for_color = }')
@@ -90,6 +121,7 @@ class Detail:
         print('====AFTER=====')
         print(f'{self.name = }, {self.name_for_color = }')
         print('============================')
+        '''
 
     def fill_detail(self, painter, vertices, side):
         painter.setBrush(QBrush(QColor(self.colors[side]), Qt.SolidPattern))
