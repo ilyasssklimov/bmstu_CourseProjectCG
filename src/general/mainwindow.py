@@ -98,7 +98,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         painter.setBrush(brush)
         painter.drawRect(self.image)
 
-        self.model.draw(painter)
+        if self.duration == 0:
+            self.model.draw(painter)
+        else:
+            self.model.draw_turning(painter, self.turning_side)
+
         painter.end()
 
     def scale_model(self):

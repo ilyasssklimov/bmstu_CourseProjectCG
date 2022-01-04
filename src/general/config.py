@@ -360,7 +360,8 @@ class CubeConfig:
             'R': 'red',
             'L': 'orange',
             'U': 'blue',
-            'D': 'green'
+            'D': 'green',
+            'black': 'black'
         }
 
         return colors

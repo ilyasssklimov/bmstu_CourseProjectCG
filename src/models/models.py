@@ -30,11 +30,19 @@ class Model:
         self.set_visible_sides()
 
     def draw(self, painter):
-        pen = QPen(Qt.black, 4)
+        pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
         self.corners.draw(painter, self.visible_sides)
         self.ribs.draw(painter, self.visible_sides)
+        self.centers.draw(painter, self.visible_sides)
+
+    def draw_turning(self, painter, side):
+        pen = QPen(Qt.black, 6)
+        painter.setPen(pen)
+
+        self.corners.draw_turning(painter, self.visible_sides, side)
+        self.ribs.draw_turning(painter, self.visible_sides, side)
         self.centers.draw(painter, self.visible_sides)
 
     def scale(self, k):

@@ -119,6 +119,20 @@ class Rib(Detail):
     def __init__(self, vertices, edges, offset, name):
         super().__init__(vertices, edges, offset, name)
 
+    def draw_turning(self, painter, visible_sides, side):
+        self.draw(painter, visible_sides)
+        ribs_below = config.CubeConfig().get_exchanges_centers()[side]
+
+        if side in visible_sides and len(set(self.name) & set(ribs_below)) == 2:
+            vertices_pairs = []
+            for key in self.sides[side]:
+                edge = self.edges[key]
+                start, finish = self.vertices[edge.first], self.vertices[edge.second]
+                vertices_pairs.append([start, finish])
+
+            vertices = get_vertices_by_pairs(vertices_pairs)
+            self.fill_detail(painter, vertices, 'black')
+
 
 class Center(Detail):
     def __init__(self, vertices, edges, offset, name):
@@ -158,6 +172,11 @@ class Corners:
     def draw(self, painter, visible_sides):
         for key in self.corners:
             if set(visible_sides) & set(key):
+                self.corners[key].draw(painter, visible_sides)
+
+    def draw_turning(self, painter, visible_sides, side):
+        for key in self.corners:
+            if set(visible_sides) & set(key) and side not in key:
                 self.corners[key].draw(painter, visible_sides)
 
     def move(self, point):
@@ -255,6 +274,12 @@ class Ribs:
             if set(visible_sides) & set(key):
                 for rib in self.ribs[key]:
                     rib.draw(painter, visible_sides)
+
+    def draw_turning(self, painter, visible_sides, side):
+        for key in self.ribs:
+            if set(visible_sides) & set(key) and side not in key:
+                for rib in self.ribs[key]:
+                    rib.draw_turning(painter, visible_sides, side)
 
     def move(self, point):
         for key in self.ribs:
