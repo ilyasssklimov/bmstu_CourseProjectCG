@@ -143,6 +143,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.x, self.y = event.x(), event.y()
 
     def mouseMoveEvent(self, event):
+        if self.duration != 0:
+            return
+
         x1, y1 = event.x(), event.y()
         dx, dy = sign(x1 - self.x) * self.speed, sign(self.y - y1) * self.speed
 

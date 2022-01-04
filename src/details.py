@@ -90,7 +90,7 @@ class Detail:
 
         if len(self.name) == 2:
             self.name = replace_list(self.prev_name, old_letter, new_letter)
-        else:
+        elif len(self.name) == 3:
             self.name = reverse_replace_list(self.prev_name, old_letter, new_letter, side)
 
     def fill_detail(self, painter, vertices, side):
