@@ -1,4 +1,4 @@
-from src.math.mymath import sin_deg, cos_deg
+from src.utils.mymath import sin_deg, cos_deg
 
 
 class Point:

@@ -3,8 +3,8 @@ from PyQt5.QtGui import QPen, QColor, QBrush
 
 import src.general.config as config
 from copy import deepcopy
-from src.math.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
-from src.math.point import Point
+from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
+from src.utils.point import Point
 
 
 # TODO: наследовать детали от одного класса

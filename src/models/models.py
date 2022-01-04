@@ -3,9 +3,9 @@ from src.general.config import Config, CubeConfig, EPS
 from src.models.details import Corners, Ribs, Centers
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen
-from src.math.point import Point
-from src.math.matrix import MatrixPlane, MatrixBody, MatrixTransform
-from src.math.mymath import Vector, Angle
+from src.utils.point import Point
+from src.utils.matrix import MatrixPlane, MatrixBody, MatrixTransform
+from src.utils.mymath import Vector, Angle
 from math import asin, acos, degrees, cos
 
 

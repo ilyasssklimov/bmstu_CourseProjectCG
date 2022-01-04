@@ -1,5 +1,5 @@
-from src.math.mymath import Vector, sin_deg, cos_deg
-from src.math.point import Point
+from src.utils.mymath import Vector, sin_deg, cos_deg
+from src.utils.point import Point
 
 
 class MatrixTransform:

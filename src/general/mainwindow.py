@@ -2,8 +2,8 @@ from src.general.config import Config
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
 from src.models.models import Cube
-from src.math.mymath import sign
-from src.math.point import Point
+from src.utils.mymath import sign
+from src.utils.point import Point
 from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QColor, QRadialGradient, QBrush
 from PyQt5 import QtWidgets, QtCore
