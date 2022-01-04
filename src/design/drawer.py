@@ -1,6 +1,5 @@
 from PyQt5.QtCore import QPoint
 
-from mymath import find_y_min_max, sign
 from PyQt5.QtGui import QPainter, QPolygon
 
 

@@ -1,9 +1,9 @@
 # TODO: возможно убрать классы и сделать "голые" данные
 
 
-from edge import Edge
-from errors import SideNameError
-from point import Point
+from src.math.edge import Edge
+from src.general.errors import SideNameError
+from src.math.point import Point
 
 
 EPS = 1e5

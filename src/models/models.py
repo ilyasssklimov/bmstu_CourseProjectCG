@@ -1,11 +1,11 @@
 from collections import Counter
-from config import Config, CubeConfig, EPS
-from details import Corners, Ribs, Centers
+from src.general.config import Config, CubeConfig, EPS
+from src.models.details import Corners, Ribs, Centers
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen
-from point import Point
-from matrix import MatrixPlane, MatrixBody, MatrixTransform
-from mymath import Vector, Angle
+from src.math.point import Point
+from src.math.matrix import MatrixPlane, MatrixBody, MatrixTransform
+from src.math.mymath import Vector, Angle
 from math import asin, acos, degrees, cos
 
 

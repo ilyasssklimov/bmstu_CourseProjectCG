@@ -1,10 +1,10 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QColor, QBrush
 
-import config
+import src.general.config as config
 from copy import deepcopy
-from mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
-from point import Point
+from src.math.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
+from src.math.point import Point
 
 
 # TODO: наследовать детали от одного класса
