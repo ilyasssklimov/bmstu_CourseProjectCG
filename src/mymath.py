@@ -143,12 +143,17 @@ def replace_list(src_list, old, new):
 
 def reverse_replace_list(src_list, old, new, const):
     # tmp = [x if x  old else new for x in src_list]
-    tmp = replace_list(src_list, old, new)
+    new_list = replace_list(src_list, old, new)
+    indices = [i for i in range(len(src_list))]
+    indices.remove(src_list.index(const))
+    new_list[indices[0]], new_list[indices[-1]] = new_list[indices[-1]], new_list[indices[0]]
+    '''
     if tmp.index(const) == 0:
         tmp[1], tmp[2] = tmp[2], tmp[1]
     elif tmp.index(const) == 1:
         tmp[0], tmp[2] = tmp[2], tmp[0]
     else:
         tmp[0], tmp[1] = tmp[1], tmp[0]
+    '''
 
-    return tmp
+    return new_list
