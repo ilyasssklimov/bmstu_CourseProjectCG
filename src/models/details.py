@@ -1,9 +1,9 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPen, QColor, QBrush
+from PyQt5.QtGui import QColor, QBrush
 
 import src.general.config as config
 from copy import deepcopy
-from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_dist
+from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
 from src.utils.point import Point
 
 
@@ -179,6 +179,9 @@ class Center(Detail):
         # for edge in self.edges:
         # start, finish = self.vertices[edge.first], self.vertices[edge.second]
         # painter.create_line(start.x, start.y, finish.x, finish.y)
+        self.fill_detail(painter)
+
+    def draw_turning(self, painter):
         self.fill_detail(painter)
 
 

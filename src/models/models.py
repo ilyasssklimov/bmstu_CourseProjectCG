@@ -58,10 +58,7 @@ class Model:
         details = sorted(eccentric, key=eccentric.get)
 
         for detail in details:
-            if not isinstance(detail, Center):
-                detail.draw_turning(painter)
-            else:
-                detail.draw(painter, [side])
+            detail.draw_turning(painter)
         '''
         for key in details:
             if len(key) == 2:
