@@ -148,3 +148,7 @@ def reverse_replace_list(src_list, old, new, const):
     new_list[indices[0]], new_list[indices[-1]] = new_list[indices[-1]], new_list[indices[0]]
 
     return new_list
+
+
+def get_dist(p_1, p_2):
+    return sqrt((p_2.x - p_1.x) ** 2 + (p_2.y - p_1.y) ** 2 + (p_2.z - p_1.z) ** 2)

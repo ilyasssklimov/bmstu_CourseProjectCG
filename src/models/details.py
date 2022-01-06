@@ -3,7 +3,7 @@ from PyQt5.QtGui import QPen, QColor, QBrush
 
 import src.general.config as config
 from copy import deepcopy
-from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
+from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_dist
 from src.utils.point import Point
 
 
@@ -19,7 +19,6 @@ class Detail:
         self.prev_name = None
         self.set_name(name)
         self.name_for_color = list(name)
-        # self.name_to_color.sort()
         self.colors = config.CubeConfig().get_center_colors()
         if eccentric:
             self.sides = config.CubeConfig().get_eccentric_detail_sides()
@@ -109,6 +108,35 @@ class Detail:
                 vertices = get_vertices_by_pairs(vertices_pairs)
                 self.fill_detail(painter, vertices, self.name_for_color[self.name.index(side)])
 
+    def draw_turning(self, painter):
+        stickers_centers = {}
+        sides_vertices = {}
+        for side in self.sides:
+            vertices_pairs = []
+            for key in self.sides[side]:
+                edge = self.edges[key]
+                start, finish = self.vertices[edge.first], self.vertices[edge.second]
+                vertices_pairs.append([start, finish])
+
+            vertices = get_vertices_by_pairs(vertices_pairs)
+            center = 0
+            for vertex in vertices:
+                center += vertex.z
+            center /= len(vertices)
+            stickers_centers[side] = center
+            sides_vertices[side] = vertices
+
+        sides = sorted(stickers_centers, key=stickers_centers.get)
+        for side in sides:
+            if side in self.name:
+                self.fill_detail(painter, sides_vertices[side], self.name_for_color[self.name.index(side)])
+
+    def get_center(self):
+        center = 0
+        for vertex in self.vertices.values():
+            center += vertex.z
+        return center / len(self.vertices)
+
 
 class Corner(Detail):
     def __init__(self, vertices, edges, offset, name):
@@ -118,20 +146,24 @@ class Corner(Detail):
 class Rib(Detail):
     def __init__(self, vertices, edges, offset, name):
         super().__init__(vertices, edges, offset, name)
+        self.extreme = False
 
-    def draw_turning(self, painter, visible_sides, side):
-        self.draw(painter, visible_sides)
-        ribs_below = config.CubeConfig().get_exchanges_centers()[side]
+    def set_extreme(self):
+        self.extreme = True
 
-        if side in visible_sides and len(set(self.name) & set(ribs_below)) == 2:
-            vertices_pairs = []
-            for key in self.sides[side]:
-                edge = self.edges[key]
-                start, finish = self.vertices[edge.first], self.vertices[edge.second]
-                vertices_pairs.append([start, finish])
+    def draw_below_turning(self, painter, side):
+        # self.draw(painter, visible_sides)
+        # ribs_below = config.CubeConfig().get_exchanges_centers()[side]
 
-            vertices = get_vertices_by_pairs(vertices_pairs)
-            self.fill_detail(painter, vertices, 'black')
+        # if side in visible_sides and self.extreme and len(set(self.name) & set(ribs_below)) == 2:
+        vertices_pairs = []
+        for key in self.sides[side]:
+            edge = self.edges[key]
+            start, finish = self.vertices[edge.first], self.vertices[edge.second]
+            vertices_pairs.append([start, finish])
+
+        vertices = get_vertices_by_pairs(vertices_pairs)
+        self.fill_detail(painter, vertices, 'black')
 
 
 class Center(Detail):
@@ -174,10 +206,18 @@ class Corners:
             if set(visible_sides) & set(key):
                 self.corners[key].draw(painter, visible_sides)
 
-    def draw_turning(self, painter, visible_sides, side):
+    def draw_below_turning(self, painter, visible_sides, side):
         for key in self.corners:
             if set(visible_sides) & set(key) and side not in key:
                 self.corners[key].draw(painter, visible_sides)
+
+    def get_centers(self, side):
+        corners_centers = {}
+        for key in self.corners:
+            if side in key:
+                corners_centers[self.corners[key]] = self.corners[key].get_center()
+
+        return corners_centers
 
     def move(self, point):
         for key in self.corners:
@@ -266,8 +306,11 @@ class Ribs:
             positions = cfg.get_offset_ribs()
             for key, value in positions.items():
                 self.ribs[key] = []
+                max_pos, min_pos = max(positions[key]), min(positions[key])
                 for position in positions[key]:
                     self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key))
+                    if position == max_pos or position == min_pos:
+                        self.ribs[key][-1].set_extreme()
 
     def draw(self, painter, visible_sides):
         for key in self.ribs:
@@ -275,11 +318,27 @@ class Ribs:
                 for rib in self.ribs[key]:
                     rib.draw(painter, visible_sides)
 
-    def draw_turning(self, painter, visible_sides, side):
+    def draw_below_turning(self, painter, visible_sides, side):
+        ribs_below = config.CubeConfig().get_exchanges_centers()[side]
+        for key in self.ribs:
+            for rib in self.ribs[key]:
+                if set(visible_sides) & set(key) and side in visible_sides and rib.extreme \
+                        and len(set(rib.name) & set(ribs_below)) == 2:
+                    rib.draw_below_turning(painter, side)
+
         for key in self.ribs:
             if set(visible_sides) & set(key) and side not in key:
                 for rib in self.ribs[key]:
-                    rib.draw_turning(painter, visible_sides, side)
+                    rib.draw(painter, visible_sides)
+
+    def get_centers(self, side):
+        ribs_centers = {}
+        for key in self.ribs:
+            if side in key:
+                for rib in self.ribs[key]:
+                    ribs_centers[rib] = rib.get_center()
+
+        return ribs_centers
 
     def move(self, point):
         for key in self.ribs:
@@ -378,6 +437,16 @@ class Centers:
             for key in visible_sides:
                 for center in self.centers[key]:
                     center.draw(painter)
+
+    def get_center(self, side):
+        if self.n == 2:
+            return {}
+
+        center_centers = {}
+        for center in self.centers[side]:
+            center_centers[center] = center.get_center()
+
+        return center_centers
 
     def move(self, point):
         for key in self.centers:

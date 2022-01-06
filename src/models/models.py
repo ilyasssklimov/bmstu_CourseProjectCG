@@ -1,6 +1,6 @@
 from collections import Counter
 from src.general.config import Config, CubeConfig, EPS
-from src.models.details import Corners, Ribs, Centers
+from src.models.details import Corners, Ribs, Centers, Corner, Rib, Center
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen
 from src.utils.point import Point
@@ -38,12 +38,43 @@ class Model:
         self.centers.draw(painter, self.visible_sides)
 
     def draw_turning(self, painter, side):
+        # TODO: красить полностью грань перед поворачиваемой
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
-        self.corners.draw_turning(painter, self.visible_sides, side)
-        self.ribs.draw_turning(painter, self.visible_sides, side)
+        self.ribs.draw_below_turning(painter, self.visible_sides, side)
+        self.corners.draw_below_turning(painter, self.visible_sides, side)
         self.centers.draw(painter, self.visible_sides)
+
+        self.artist(painter, side)
+
+    def artist(self, painter, side):
+        # Если противоположная сторона грани видна, то черным
+
+        corners = self.corners.get_centers(side)
+        ribs = self.ribs.get_centers(side)
+        centers = self.centers.get_center(side)
+        eccentric = corners | ribs | centers
+        details = sorted(eccentric, key=eccentric.get)
+
+        for detail in details:
+            if not isinstance(detail, Center):
+                detail.draw_turning(painter)
+            else:
+                detail.draw(painter, [side])
+        '''
+        for key in details:
+            if len(key) == 2:
+                for rib in self.ribs.ribs[key]:
+                    rib.draw_turning(painter)
+            elif len(key) == 3:
+                self.corners.corners[key].draw_turning(painter)
+            else:
+                for center in self.centers.centers[key]:
+                    center.draw(painter, [side])
+        '''
+        # print(self.centers.get_center(side))
+        # self.centers.draw(painter, [side])
 
     def scale(self, k):
         k = k if k else 1
