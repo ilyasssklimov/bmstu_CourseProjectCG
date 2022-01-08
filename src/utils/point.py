@@ -79,3 +79,11 @@ class Point:
 
     def get_homogenous_coordinates(self):
         return [self.x, self.y, self.z, 1]
+
+
+def divide_line_by_num(point_1, point_2, alpha):
+    return Point(
+        (point_1.x + alpha * point_2.x) / (1 + alpha),
+        (point_1.y + alpha * point_2.y) / (1 + alpha),
+        (point_1.z + alpha * point_2.z) / (1 + alpha),
+    )

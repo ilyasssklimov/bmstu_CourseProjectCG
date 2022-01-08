@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from src.general.config import Config
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
@@ -41,6 +43,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.duration = 0
         self.turning_side = ''
         self.turning_direction = 0
+        self.plastic_vertices = None
 
         self.loadButton.clicked.connect(self.load_model)
         self.scaleSlider.valueChanged.connect(self.scale_model)
@@ -101,7 +104,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.duration == 0:
             self.model.draw(painter)
         else:
-            self.model.draw_turning(painter, self.turning_side)
+            self.model.draw_turning(painter, self.turning_side, self.plastic_vertices)
 
         painter.end()
 
@@ -171,6 +174,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def start_turning_side(self, name, direction):
         if self.duration == 0:
+            self.plastic_vertices = self.model.get_plastic_part(name)
+            # self.black_part = deepcopy(self.model.get_black_part(name))
+            # print(f'{self.black_part = }')
             self.set_turning_params(name, direction)
             self.timer.start(0)
 

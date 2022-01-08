@@ -3,6 +3,7 @@ from PyQt5.QtGui import QColor, QBrush
 
 import src.general.config as config
 from copy import deepcopy
+from src.utils.point import divide_line_by_num
 from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
 from src.utils.point import Point
 
@@ -108,7 +109,7 @@ class Detail:
                 vertices = get_vertices_by_pairs(vertices_pairs)
                 self.fill_detail(painter, vertices, self.name_for_color[self.name.index(side)])
 
-    def draw_turning(self, painter):
+    def draw_turning(self, painter, visible_sides, turning_side):
         stickers_centers = {}
         sides_vertices = {}
         for side in self.sides:
@@ -131,11 +132,22 @@ class Detail:
             if side in self.name:
                 self.fill_detail(painter, sides_vertices[side], self.name_for_color[self.name.index(side)])
 
+        opposite_side = config.CubeConfig().get_opposite(turning_side)
+        if opposite_side in visible_sides:
+            self.fill_detail(painter, sides_vertices[opposite_side], 'black')
+
     def get_center(self):
         center = 0
         for vertex in self.vertices.values():
             center += vertex.z
         return center / len(self.vertices)
+
+    def get_vertex_by_name(self, name):
+        set_name = set(name)
+        for key in self.vertices:
+            if set(key) == set_name:
+                return self.vertices[key]
+        return None
 
 
 class Corner(Detail):
@@ -181,7 +193,7 @@ class Center(Detail):
         # painter.create_line(start.x, start.y, finish.x, finish.y)
         self.fill_detail(painter)
 
-    def draw_turning(self, painter):
+    def draw_turning(self, painter, visible_sides, turning_side):
         self.fill_detail(painter)
 
 
@@ -213,6 +225,48 @@ class Corners:
         for key in self.corners:
             if set(visible_sides) & set(key) and side not in key:
                 self.corners[key].draw(painter, visible_sides)
+
+    def get_plastic_part(self, side, n):
+        def get_carcass_vertices(src_vertices):
+            vertices = []
+            for vertex in src_vertices:
+                set_vertex = set(vertex)
+                for key in self.carcass:
+                    if set_vertex == set(key):
+                        vertices.append(self.carcass[key])
+                        break
+
+            return vertices
+
+        turning_vertices = config.CubeConfig().get_exchanges_corners()[side]
+        opposite_side = config.CubeConfig().get_opposite(side)
+        below_vertices = [vertex.replace(side, opposite_side) for vertex in turning_vertices]
+
+        upper_vertices = get_carcass_vertices(turning_vertices)
+        lower_vertices = get_carcass_vertices(below_vertices)
+
+        alpha = n - 1
+        plastic_vertices = []
+        for up_vertex, low_vertex in zip(upper_vertices, lower_vertices):
+            plastic_vertices.append(divide_line_by_num(low_vertex, up_vertex, alpha))
+
+        '''
+        turning_vertices = config.CubeConfig().get_exchanges_corners()[side]
+        opposite_side = config.CubeConfig().get_opposite(side)
+        below_vertices = [vertex.replace(side, opposite_side) for vertex in turning_vertices]
+
+        vertices = []
+        for vertex, below in zip(turning_vertices, below_vertices):
+            set_vertex = set(vertex)
+            for key in self.corners:
+                if set_vertex == set(key):
+                    vertices.append(self.corners[key].get_vertex_by_name(below))
+                    break
+
+        return vertices
+        '''
+
+        return plastic_vertices
 
     def get_centers(self, side):
         corners_centers = {}

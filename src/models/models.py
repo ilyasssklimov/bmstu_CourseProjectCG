@@ -2,7 +2,7 @@ from collections import Counter
 from src.general.config import Config, CubeConfig, EPS
 from src.models.details import Corners, Ribs, Centers, Corner, Rib, Center
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPen
+from PyQt5.QtGui import QPen, QBrush, QColor
 from src.utils.point import Point
 from src.utils.matrix import MatrixPlane, MatrixBody, MatrixTransform
 from src.utils.mymath import Vector, Angle
@@ -37,16 +37,28 @@ class Model:
         self.ribs.draw(painter, self.visible_sides)
         self.centers.draw(painter, self.visible_sides)
 
-    def draw_turning(self, painter, side):
+    def draw_turning(self, painter, side, plastic_part):
         # TODO: красить полностью грань перед поворачиваемой
+        def draw_below_turning():
+            self.ribs.draw_below_turning(painter, self.visible_sides, side)
+            self.centers.draw(painter, self.visible_sides)
+            self.corners.draw_below_turning(painter, self.visible_sides, side)
+
+        def draw_plastic_part():
+            painter.setBrush(QBrush(QColor('black'), Qt.SolidPattern))
+            painter.fill(plastic_part)
+
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
-        self.ribs.draw_below_turning(painter, self.visible_sides, side)
-        self.corners.draw_below_turning(painter, self.visible_sides, side)
-        self.centers.draw(painter, self.visible_sides)
-
-        self.artist(painter, side)
+        if side in self.visible_sides:
+            draw_below_turning()
+            draw_plastic_part()
+            self.artist(painter, side)
+        else:
+            self.artist(painter, side)
+            # draw_plastic_part()
+            draw_below_turning()
 
     def artist(self, painter, side):
         # Если противоположная сторона грани видна, то черным
@@ -58,7 +70,7 @@ class Model:
         details = sorted(eccentric, key=eccentric.get)
 
         for detail in details:
-            detail.draw_turning(painter)
+            detail.draw_turning(painter, self.visible_sides, side)
         '''
         for key in details:
             if len(key) == 2:
@@ -72,6 +84,18 @@ class Model:
         '''
         # print(self.centers.get_center(side))
         # self.centers.draw(painter, [side])
+
+    '''
+    def set_black_part(self):
+        # TODO: возможно удалить
+        self.black_part = {}
+        sides = ['U', 'D', 'R', 'L', 'D', 'U']
+        for side in sides:
+            self.black_part[side] = self.corners.get_black_part(side)
+    '''
+
+    def get_plastic_part(self, side):
+        return self.corners.get_plastic_part(side, self.n)
 
     def scale(self, k):
         k = k if k else 1
