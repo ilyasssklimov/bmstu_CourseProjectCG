@@ -330,16 +330,6 @@
       <string>8x8x8</string>
      </property>
     </item>
-    <item>
-     <property name="text">
-      <string>9x9x9</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>10x10x10</string>
-     </property>
-    </item>
    </widget>
    <widget class="QPushButton" name="down">
     <property name="geometry">
