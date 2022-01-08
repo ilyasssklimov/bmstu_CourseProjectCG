@@ -158,24 +158,6 @@ class Corner(Detail):
 class Rib(Detail):
     def __init__(self, vertices, edges, offset, name):
         super().__init__(vertices, edges, offset, name)
-        self.extreme = False
-
-    def set_extreme(self):
-        self.extreme = True
-
-    def draw_below_turning(self, painter, side):
-        # self.draw(painter, visible_sides)
-        # ribs_below = config.CubeConfig().get_exchanges_centers()[side]
-
-        # if side in visible_sides and self.extreme and len(set(self.name) & set(ribs_below)) == 2:
-        vertices_pairs = []
-        for key in self.sides[side]:
-            edge = self.edges[key]
-            start, finish = self.vertices[edge.first], self.vertices[edge.second]
-            vertices_pairs.append([start, finish])
-
-        vertices = get_vertices_by_pairs(vertices_pairs)
-        self.fill_detail(painter, vertices, 'black')
 
 
 class Center(Detail):
@@ -188,9 +170,6 @@ class Center(Detail):
         painter.fill(self.vertices.values())
 
     def draw(self, painter, visible_sides=None):
-        # for edge in self.edges:
-        # start, finish = self.vertices[edge.first], self.vertices[edge.second]
-        # painter.create_line(start.x, start.y, finish.x, finish.y)
         self.fill_detail(painter)
 
     def draw_turning(self, painter, visible_sides, turning_side):
@@ -226,7 +205,7 @@ class Corners:
             if set(visible_sides) & set(key) and side not in key:
                 self.corners[key].draw(painter, visible_sides)
 
-    def get_plastic_part(self, side, n):
+    def get_static_plastic_part(self, side, n):
         def get_carcass_vertices(src_vertices):
             vertices = []
             for vertex in src_vertices:
@@ -249,22 +228,6 @@ class Corners:
         plastic_vertices = []
         for up_vertex, low_vertex in zip(upper_vertices, lower_vertices):
             plastic_vertices.append(divide_line_by_num(low_vertex, up_vertex, alpha))
-
-        '''
-        turning_vertices = config.CubeConfig().get_exchanges_corners()[side]
-        opposite_side = config.CubeConfig().get_opposite(side)
-        below_vertices = [vertex.replace(side, opposite_side) for vertex in turning_vertices]
-
-        vertices = []
-        for vertex, below in zip(turning_vertices, below_vertices):
-            set_vertex = set(vertex)
-            for key in self.corners:
-                if set_vertex == set(key):
-                    vertices.append(self.corners[key].get_vertex_by_name(below))
-                    break
-
-        return vertices
-        '''
 
         return plastic_vertices
 
@@ -363,11 +326,8 @@ class Ribs:
             positions = cfg.get_offset_ribs()
             for key, value in positions.items():
                 self.ribs[key] = []
-                max_pos, min_pos = max(positions[key]), min(positions[key])
                 for position in positions[key]:
                     self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key))
-                    if position == max_pos or position == min_pos:
-                        self.ribs[key][-1].set_extreme()
 
     def draw(self, painter, visible_sides):
         for key in self.ribs:
@@ -376,13 +336,6 @@ class Ribs:
                     rib.draw(painter, visible_sides)
 
     def draw_below_turning(self, painter, visible_sides, side):
-        ribs_below = config.CubeConfig().get_exchanges_centers()[side]
-        for key in self.ribs:
-            for rib in self.ribs[key]:
-                if set(visible_sides) & set(key) and side in visible_sides and rib.extreme \
-                        and len(set(rib.name) & set(ribs_below)) == 2:
-                    rib.draw_below_turning(painter, side)
-
         for key in self.ribs:
             if set(visible_sides) & set(key) and side not in key:
                 for rib in self.ribs[key]:

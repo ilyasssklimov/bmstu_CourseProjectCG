@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from src.general.config import Config
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
@@ -174,9 +172,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def start_turning_side(self, name, direction):
         if self.duration == 0:
-            self.plastic_vertices = self.model.get_plastic_part(name)
-            # self.black_part = deepcopy(self.model.get_black_part(name))
-            # print(f'{self.black_part = }')
+            self.plastic_vertices = self.model.get_static_plastic_part(name)
             self.set_turning_params(name, direction)
             self.timer.start(0)
 
