@@ -97,7 +97,7 @@ class Detail:
         painter.setBrush(QBrush(QColor(self.colors[side]), Qt.SolidPattern))
         painter.fill(vertices)
 
-    def draw(self, painter, visible_sides):
+    def draw(self, painter, visible_sides, light_sides=None):
         for side in visible_sides:
             if side in self.name:
                 vertices_pairs = []
@@ -169,11 +169,15 @@ class Center(Detail):
         painter.setBrush(QBrush(QColor(self.color), Qt.SolidPattern))
         painter.fill(self.vertices.values())
 
-    def draw(self, painter, visible_sides=None):
+    def draw(self, painter, visible_sides=None, light_sides=None):
         self.fill_detail(painter)
 
     def draw_turning(self, painter, visible_sides, turning_side):
         self.fill_detail(painter)
+
+    def draw_darker(self, painter, visible_sides=None, light_sides=None):
+        painter.setBrush(QBrush(QColor('darkRed'), Qt.SolidPattern))
+        painter.fill(self.vertices.values())
 
 
 class Corners:
@@ -195,10 +199,10 @@ class Corners:
 
         return carcass
 
-    def draw(self, painter, visible_sides):
+    def draw(self, painter, visible_sides, light_sides):
         for key in self.corners:
             if set(visible_sides) & set(key):
-                self.corners[key].draw(painter, visible_sides)
+                self.corners[key].draw(painter, visible_sides, light_sides)
 
     def draw_below_turning(self, painter, visible_sides, side):
         for key in self.corners:
@@ -329,11 +333,11 @@ class Ribs:
                 for position in positions[key]:
                     self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key))
 
-    def draw(self, painter, visible_sides):
+    def draw(self, painter, visible_sides, light_sides):
         for key in self.ribs:
             if set(visible_sides) & set(key):
                 for rib in self.ribs[key]:
-                    rib.draw(painter, visible_sides)
+                    rib.draw(painter, visible_sides, light_sides)
 
     def draw_below_turning(self, painter, visible_sides, side):
         for key in self.ribs:
@@ -442,11 +446,15 @@ class Centers:
 
         return sides_centers
 
-    def draw(self, painter, visible_sides):
+    def draw(self, painter, visible_sides, light_sides):
         if self.n > 2:
             for key in visible_sides:
-                for center in self.centers[key]:
-                    center.draw(painter)
+                if light_sides and key in light_sides:
+                    for center in self.centers[key]:
+                        center.draw_darker(painter, visible_sides, light_sides)
+                else:
+                    for center in self.centers[key]:
+                        center.draw(painter, visible_sides, light_sides)
 
     def get_center(self, side):
         if self.n == 2:

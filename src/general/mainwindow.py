@@ -1,12 +1,18 @@
+from time import sleep
+
+from PyQt5.QtCore import QRect, QPoint, Qt
+from PyQt5.QtGui import QColor, QRadialGradient, QBrush, QPen, QPixmap
+from PyQt5 import QtWidgets, QtCore
+from random import choice
+
+from PyQt5.QtWidgets import QLabel
+
 from src.general.config import Config, get_colors
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
 from src.models.models import Cube
 from src.utils.mymath import sign
 from src.utils.point import Point
-from PyQt5.QtCore import QRect, QPoint
-from PyQt5.QtGui import QColor, QRadialGradient, QBrush
-from PyQt5 import QtWidgets, QtCore
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -35,6 +41,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.y = 0
         self.cfg = Config()
         self.viewer = Point(self.cfg.dx, self.cfg.dy, self.cfg.dz)
+
+        self.light_sources = []
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.turn_side)
@@ -68,6 +76,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         }
 
     def set_connects_to_buttons(self):
+        self.mixButton.clicked.connect(self.mix_model)
+
         self.right.clicked.connect(lambda: self.start_turning_side('R', 1))
         self.up.clicked.connect(lambda: self.start_turning_side('U', 1))
         self.front.clicked.connect(lambda: self.start_turning_side('F', 1))
@@ -81,6 +91,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.left_.clicked.connect(lambda: self.start_turning_side('L', -1))
         self.down_.clicked.connect(lambda: self.start_turning_side('D', -1))
         self.back_.clicked.connect(lambda: self.start_turning_side('B', -1))
+
+        self.add_light.clicked.connect(self.add_light_source)
 
     def change_turn_buttons_color(self, mode='standard'):
         colors = get_colors(mode)
@@ -108,13 +120,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.k = 10
         model = self.models.currentText()
 
-        if model == 'Кубик Рубика':
-            self.model = Cube(int(self.sizeModel.currentText().split('x')[0]))
-            self.model.turn_oy(45)
-            self.model.turn_ox(-30)
-            self.update()
-        else:
-            print('Another model')
+        match model:
+            case 'Кубик Рубика':
+                self.model = Cube(int(self.sizeModel.currentText().split('x')[0]))
+                self.model.turn_oy(45)
+                self.model.turn_ox(-30)
+                self.update()
+            case _:
+                print('Another model')
+
+    def mix_model(self):
+        print('Temporarily does\'not work :(')
 
     def paintEvent(self, event):
         painter = QtDrawer()
@@ -218,3 +234,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def keyPressEvent(self, event):
         if event.key() in self.turning_keys and self.duration == 0:
             self.start_turning_side(*self.turning_keys[event.key()])
+
+    def add_light_source(self):
+        test_point = Point(500, 0, 100)
+
+        self.light_sources.append(test_point)
+        # self.model.light_sources.append(test_point)
+
+        pixmap = QPixmap("../inc/light.png")
+        light_img = QLabel(self)
+        light_img.setPixmap(pixmap)
+        light_img.move(test_point.x, test_point.y)
+        # self.addWidget(light_img)
+
+        self.model.add_light(test_point)
+        self.update()

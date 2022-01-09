@@ -77,8 +77,11 @@ class Point:
         self.x = x * cos_angle - y * sin_angle
         self.y = x * sin_angle + y * cos_angle
 
-    def get_homogenous_coordinates(self):
+    def get_homogenous_point(self):
         return [self.x, self.y, self.z, 1]
+
+    def get_homogenous_vector(self):
+        return [self.x, self.y, self.z, 0]
 
 
 def divide_line_by_num(point_1, point_2, alpha):
