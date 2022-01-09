@@ -1,4 +1,4 @@
-from src.general.config import Config
+from src.general.config import Config, get_colors
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
 from src.models.models import Cube
@@ -55,6 +55,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rotate_z_.clicked.connect(lambda: self.turn_model_oz(-self.angle))
         # TODO: кастомизировать кнопки поворота
 
+        self.set_connects_to_buttons()
+        self.change_turn_buttons_color()
+
+        self.turning_keys = {
+            QtCore.Qt.Key_Q: ('L', 1),
+            QtCore.Qt.Key_W: ('U', 1),
+            QtCore.Qt.Key_E: ('R', 1),
+            QtCore.Qt.Key_A: ('L', -1),
+            QtCore.Qt.Key_S: ('U', -1),
+            QtCore.Qt.Key_D: ('R', -1)
+        }
+
+    def set_connects_to_buttons(self):
         self.right.clicked.connect(lambda: self.start_turning_side('R', 1))
         self.up.clicked.connect(lambda: self.start_turning_side('U', 1))
         self.front.clicked.connect(lambda: self.start_turning_side('F', 1))
@@ -69,14 +82,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.down_.clicked.connect(lambda: self.start_turning_side('D', -1))
         self.back_.clicked.connect(lambda: self.start_turning_side('B', -1))
 
-        self.turning_keys = {
-            QtCore.Qt.Key_Q: ('L', 1),
-            QtCore.Qt.Key_W: ('U', 1),
-            QtCore.Qt.Key_E: ('R', 1),
-            QtCore.Qt.Key_A: ('L', -1),
-            QtCore.Qt.Key_S: ('U', -1),
-            QtCore.Qt.Key_D: ('R', -1)
-        }
+    def change_turn_buttons_color(self, mode='standard'):
+        colors = get_colors(mode)
+
+        self.right.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["R"]}')
+        self.right_.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["R"]}')
+
+        self.up.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["U"]}')
+        self.up_.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["U"]}')
+
+        self.front.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["F"]}')
+        self.front_.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["F"]}')
+
+        self.left.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["L"]}')
+        self.left_.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["L"]}')
+
+        self.down.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["D"]}')
+        self.down_.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["D"]}')
+
+        self.back.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["B"]}')
+        self.back_.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["B"]}')
 
     def load_model(self):
         self.scaleSlider.setValue(10)

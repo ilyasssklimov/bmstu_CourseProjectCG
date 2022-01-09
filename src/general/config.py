@@ -365,3 +365,18 @@ class CubeConfig:
         }
 
         return colors
+
+
+def get_colors(mode='standard'):
+    match mode:
+        case 'standard':
+            return {
+                'R': 'red',
+                'L': 'orange',
+                'U': 'blue',
+                'D': 'green',
+                'F': 'white',
+                'B': 'yellow'
+            }
+        case _:
+            raise ValueError('Incorrect mode to get colors')
