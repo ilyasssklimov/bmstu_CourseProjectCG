@@ -223,6 +223,9 @@
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -240,6 +243,9 @@
      <font>
       <pointsize>10</pointsize>
      </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string/>
@@ -259,6 +265,9 @@
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -277,9 +286,8 @@
       <pointsize>10</pointsize>
      </font>
     </property>
-    <property name="styleSheet">
-     <string notr="true">border : 2px solid black;
-border-radius : 20px;</string>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string/>
@@ -349,6 +357,9 @@ border-radius : 20px;</string>
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -366,6 +377,9 @@ border-radius : 20px;</string>
      <font>
       <pointsize>10</pointsize>
      </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string/>
@@ -385,6 +399,9 @@ border-radius : 20px;</string>
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -402,6 +419,9 @@ border-radius : 20px;</string>
      <font>
       <pointsize>10</pointsize>
      </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string/>
@@ -421,6 +441,9 @@ border-radius : 20px;</string>
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -438,6 +461,9 @@ border-radius : 20px;</string>
      <font>
       <pointsize>10</pointsize>
      </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string/>
@@ -457,6 +483,9 @@ border-radius : 20px;</string>
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -475,6 +504,9 @@ border-radius : 20px;</string>
       <pointsize>10</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -489,7 +521,7 @@ border-radius : 20px;</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">image: url(:/for_turn_buttons/clockwise.png);</string>
+     <string notr="true">image: url(:/design/clockwise.png);</string>
     </property>
     <property name="text">
      <string/>
@@ -505,7 +537,83 @@ border-radius : 20px;</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">image: url(:/for_turn_buttons/counterclock_wise.png);</string>
+     <string notr="true">image: url(:/design/counterclock_wise.png);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="add_light">
+    <property name="geometry">
+     <rect>
+      <x>1190</x>
+      <y>700</y>
+      <width>41</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+image: url(:/design/plus.png);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="count_lights">
+    <property name="geometry">
+     <rect>
+      <x>1120</x>
+      <y>700</y>
+      <width>51</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>1110</x>
+      <y>640</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Добавить источник
+света</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="delete_light">
+    <property name="geometry">
+     <rect>
+      <x>1230</x>
+      <y>700</y>
+      <width>41</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+image: url(:/design/minus.png);</string>
     </property>
     <property name="text">
      <string/>
