@@ -2,10 +2,15 @@ from math import pi, sin, cos, sqrt
 
 
 class Vector:
-    def __init__(self, start, finish):
-        self.x = finish.x - start.x
-        self.y = finish.y - start.y
-        self.z = finish.z - start.z
+    def __init__(self, start, finish=None):
+        if finish:
+            self.x = finish.x - start.x
+            self.y = finish.y - start.y
+            self.z = finish.z - start.z
+        else:
+            self.x = start.x
+            self.y = start.y
+            self.z = start.z
 
     def __str__(self):
         return f'Vector({self.x}, {self.y}, {self.z})'
@@ -32,18 +37,9 @@ class Vector:
 
     def get_length_xy(self):
         return sqrt(self.x ** 2 + self.y ** 2)
-    '''
-    def get_normal(self):  # , start_2, finish_2):
-        if self.x:
-            normal = Vector(Point(1, 0, 0), Point(-self.y / self.x, 1, 0))
-        else:
-            normal = Vector(Point(0, 0, 0), Point(1, 0, 0))
 
-        # if scalar_multiplication(normal, -Vector(start_2, finish_2)) < 0:
-        #     normal.negative()
-
-        return normal
-    '''
+    def get_length(self):
+        return sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
 
 class Angle:
@@ -152,3 +148,13 @@ def reverse_replace_list(src_list, old, new, const):
 
 def get_dist(p_1, p_2):
     return sqrt((p_2.x - p_1.x) ** 2 + (p_2.y - p_1.y) ** 2 + (p_2.z - p_1.z) ** 2)
+
+
+def get_plane_cosine(light, point, normal_point):
+    vector = Vector(light, point)
+    normal = Vector(normal_point)
+
+    scalar = abs(vector.x * normal.x + vector.y * normal.y + vector.z * normal.z)
+    lengths = vector.get_length() * normal.get_length()
+
+    return scalar / lengths
