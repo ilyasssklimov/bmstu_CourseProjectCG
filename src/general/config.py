@@ -7,6 +7,7 @@ from src.utils.point import Point
 
 
 EPS = 1e5
+SHADOW = 0.2
 
 
 class Config:
@@ -355,13 +356,13 @@ class CubeConfig:
 
     def get_center_colors(self):
         colors = {
-            'F': 'white',
-            'B': 'yellow',
-            'R': 'red',
-            'L': 'orange',
-            'U': 'blue',
-            'D': 'green',
-            'black': 'black'
+            'F': (255, 255, 255),
+            'B': (255, 255, 0),
+            'R': (255, 0, 0),
+            'L': (255, 165, 0),
+            'U': (0, 0, 255),
+            'D': (0, 128, 0),
+            'black': (0, 0, 0)
         }
 
         return colors
