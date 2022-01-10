@@ -32,12 +32,21 @@ class Model:
         self.light_sources = []
 
     def draw(self, painter):
+        def draw_details(sides, light_sources=None):
+            self.corners.draw(painter, sides, light_sources)
+            self.ribs.draw(painter, sides, light_sources)
+            self.centers.draw(painter, sides, light_sources)
+
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
-        self.corners.draw(painter, self.visible_sides, self.light_sides)
-        self.ribs.draw(painter, self.visible_sides, self.light_sides)
-        self.centers.draw(painter, self.visible_sides, self.light_sides)
+        if self.light_sources:
+            light = [side for side in self.light_sides if side in self.visible_sides]
+            visible = [side for side in self.visible_sides if side not in self.light_sides]
+            draw_details(light, [Point(*[vertex for vertex in self.light_sources[:-1]])])
+            draw_details(visible)
+        else:
+            draw_details(self.visible_sides)
 
     def draw_turning(self, painter, side, plastic_part):
         def draw_below_turning():
@@ -156,7 +165,7 @@ class Model:
     def turn_side(self, name, angle):
         self.move(-self.center_point)
 
-        direction_vector = Vector(Point(0, 0, 0), self.centers.sides_centers[name])
+        direction_vector = Vector(self.centers.sides_centers[name])
         direction_vector.normalize()
         d = direction_vector.get_length_xy()
 

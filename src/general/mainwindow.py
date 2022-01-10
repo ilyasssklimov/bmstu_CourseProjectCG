@@ -236,15 +236,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.start_turning_side(*self.turning_keys[event.key()])
 
     def add_light_source(self):
-        test_point = Point(500, 0, 100)
+        cfg = Config()
+        test_point = Point(cfg.dx + 400, cfg.dy, cfg.dz)
 
         self.light_sources.append(test_point)
         # self.model.light_sources.append(test_point)
 
-        pixmap = QPixmap("../inc/light.png")
-        light_img = QLabel(self)
-        light_img.setPixmap(pixmap)
-        light_img.move(test_point.x, test_point.y)
+        # pixmap = QPixmap("../inc/light.png")
+        # light_img = QLabel(self)
+        # light_img.setPixmap(pixmap)
+        # light_img.move(test_point.x, test_point.y)
         # self.addWidget(light_img)
 
         self.model.add_light(test_point)

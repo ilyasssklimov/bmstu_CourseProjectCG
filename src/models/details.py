@@ -4,7 +4,8 @@ from PyQt5.QtGui import QColor, QBrush
 import src.general.config as config
 from copy import deepcopy
 from src.utils.point import divide_line_by_num
-from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
+from src.utils.matrix import MatrixPlane
+from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_plane_cosine
 from src.utils.point import Point
 
 
@@ -93,11 +94,22 @@ class Detail:
         elif len(self.name) == 3:
             self.name = reverse_replace_list(self.prev_name, old_letter, new_letter, side)
 
-    def fill_detail(self, painter, vertices, side):
-        painter.setBrush(QBrush(QColor(self.colors[side]), Qt.SolidPattern))
+    def fill_detail(self, painter, vertices, side, light=None):
+        if not light:
+            color = self.colors[side]
+        else:
+            sides = config.CubeConfig().get_sides()[self.name[0]]
+            plane_points = [self.vertices[vertex] for vertex in sides]
+            normal = Point(*MatrixPlane(plane_points).get_determinant()[:-1])
+            # print(light[0])
+            cosine = get_plane_cosine(light[0], self.get_center(), normal)
+            color = (int(color * cosine) for color in self.colors[side])
+            # color = (int(color * config.SHADOW) for color in self.colors[side])
+
+        painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
         painter.fill(vertices)
 
-    def draw(self, painter, visible_sides, light_sides=None):
+    def draw(self, painter, visible_sides, light=None):
         for side in visible_sides:
             if side in self.name:
                 vertices_pairs = []
@@ -107,7 +119,7 @@ class Detail:
                     vertices_pairs.append([start, finish])
 
                 vertices = get_vertices_by_pairs(vertices_pairs)
-                self.fill_detail(painter, vertices, self.name_for_color[self.name.index(side)])
+                self.fill_detail(painter, vertices, self.name_for_color[self.name.index(side)], light)
 
     def draw_turning(self, painter, visible_sides, turning_side):
         stickers_centers = {}
@@ -136,10 +148,16 @@ class Detail:
         if opposite_side in visible_sides:
             self.fill_detail(painter, sides_vertices[opposite_side], 'black')
 
-    def get_center(self):
+    def get_center_z(self):
         center = 0
         for vertex in self.vertices.values():
             center += vertex.z
+        return center / len(self.vertices)
+
+    def get_center(self):
+        center = Point()
+        for vertex in self.vertices.values():
+            center += vertex
         return center / len(self.vertices)
 
     def get_vertex_by_name(self, name):
@@ -165,19 +183,25 @@ class Center(Detail):
         super().__init__(vertices, edges, offset, name)
         self.color = self.colors[name]
 
-    def fill_detail(self, painter, vertices=None, side=None):
-        painter.setBrush(QBrush(QColor(self.color), Qt.SolidPattern))
+    def fill_detail(self, painter, vertices=None, side=None, light=None):
+        if not light:
+            color = self.color
+        else:
+            side = config.CubeConfig().get_sides()[self.name[0]]
+            plane_points = [self.vertices[vertex] for vertex in side]
+            normal = Point(*MatrixPlane(plane_points).get_determinant()[:-1])
+
+            cosine = get_plane_cosine(light[0], self.get_center(), normal)
+            color = (int(color * cosine) for color in self.color)
+
+        painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
         painter.fill(self.vertices.values())
 
-    def draw(self, painter, visible_sides=None, light_sides=None):
-        self.fill_detail(painter)
+    def draw(self, painter, visible_sides, light=None):
+        self.fill_detail(painter, None, None, light)
 
     def draw_turning(self, painter, visible_sides, turning_side):
         self.fill_detail(painter)
-
-    def draw_darker(self, painter, visible_sides=None, light_sides=None):
-        painter.setBrush(QBrush(QColor('darkRed'), Qt.SolidPattern))
-        painter.fill(self.vertices.values())
 
 
 class Corners:
@@ -199,10 +223,10 @@ class Corners:
 
         return carcass
 
-    def draw(self, painter, visible_sides, light_sides):
+    def draw(self, painter, visible_sides, light=None):
         for key in self.corners:
             if set(visible_sides) & set(key):
-                self.corners[key].draw(painter, visible_sides, light_sides)
+                self.corners[key].draw(painter, visible_sides, light)
 
     def draw_below_turning(self, painter, visible_sides, side):
         for key in self.corners:
@@ -239,7 +263,7 @@ class Corners:
         corners_centers = {}
         for key in self.corners:
             if side in key:
-                corners_centers[self.corners[key]] = self.corners[key].get_center()
+                corners_centers[self.corners[key]] = self.corners[key].get_center_z()
 
         return corners_centers
 
@@ -333,11 +357,11 @@ class Ribs:
                 for position in positions[key]:
                     self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key))
 
-    def draw(self, painter, visible_sides, light_sides):
+    def draw(self, painter, visible_sides, light=None):
         for key in self.ribs:
             if set(visible_sides) & set(key):
                 for rib in self.ribs[key]:
-                    rib.draw(painter, visible_sides, light_sides)
+                    rib.draw(painter, visible_sides, light)
 
     def draw_below_turning(self, painter, visible_sides, side):
         for key in self.ribs:
@@ -446,15 +470,11 @@ class Centers:
 
         return sides_centers
 
-    def draw(self, painter, visible_sides, light_sides):
+    def draw(self, painter, visible_sides, light=None):
         if self.n > 2:
             for key in visible_sides:
-                if light_sides and key in light_sides:
-                    for center in self.centers[key]:
-                        center.draw_darker(painter, visible_sides, light_sides)
-                else:
-                    for center in self.centers[key]:
-                        center.draw(painter, visible_sides, light_sides)
+                for center in self.centers[key]:
+                    center.draw(painter, visible_sides, light)
 
     def get_center(self, side):
         if self.n == 2:
