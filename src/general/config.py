@@ -34,86 +34,87 @@ class CubeConfig:
         self.size = Config().size / self.n
 
     def get_center_data(self, name):
-        if name == 'L':
-            vertices = {
-                'LFD': (-self.size, self.size, self.size),
-                'LFU': (-self.size, -self.size, self.size),
-                'LBU': (-self.size, -self.size, -self.size),
-                'LBD': (-self.size, self.size, -self.size)
-            }
-            edges = [
-                ('LFD', 'LFU'),
-                ('LFU', 'LBU'),
-                ('LBU', 'LBD'),
-                ('LBD', 'LFD')
-            ]
-        elif name == 'R':
-            vertices = {
-                'RFD': (self.size, self.size, self.size),
-                'RFU': (self.size, -self.size, self.size),
-                'RBU': (self.size, -self.size, -self.size),
-                'RBD': (self.size, self.size, -self.size)
-            }
-            edges = [
-                ('RFD', 'RFU'),
-                ('RFU', 'RBU'),
-                ('RBU', 'RBD'),
-                ('RBD', 'RFD')
-            ]
-        elif name == 'F':
-            vertices = {
-                'LFD': (-self.size, self.size, self.size),
-                'LFU': (-self.size, -self.size, self.size),
-                'RFU': (self.size, -self.size, self.size),
-                'RFD': (self.size, self.size, self.size)
-            }
-            edges = [
-                ('LFD', 'LFU'),
-                ('LFU', 'RFU'),
-                ('RFU', 'RFD'),
-                ('RFD', 'LFD')
-            ]
-        elif name == 'B':
-            vertices = {
-                'LBD': (-self.size, self.size, -self.size),
-                'LBU': (-self.size, -self.size, -self.size),
-                'RBU': (self.size, -self.size, -self.size),
-                'RBD': (self.size, self.size, -self.size)
-            }
-            edges = [
-                ('LBD', 'LBU'),
-                ('LBU', 'RBU'),
-                ('RBU', 'RBD'),
-                ('RBD', 'LBD')
-            ]
-        elif name == 'U':
-            vertices = {
-                'LBU': (-self.size, -self.size, -self.size),
-                'LFU': (-self.size, -self.size, self.size),
-                'RFU': (self.size, -self.size, self.size),
-                'RBU': (self.size, -self.size, -self.size)
-            }
-            edges = [
-                ('LBU', 'LFU'),
-                ('LFU', 'RFU'),
-                ('RFU', 'RBU'),
-                ('RBU', 'LBU')
-            ]
-        elif name == 'D':
-            vertices = {
-                'LBD': (-self.size, self.size, -self.size),
-                'LFD': (-self.size, self.size, self.size),
-                'RFD': (self.size, self.size, self.size),
-                'RBD': (self.size, self.size, -self.size)
-            }
-            edges = [
-                ('LBD', 'LFD'),
-                ('LFD', 'RFD'),
-                ('RFD', 'RBD'),
-                ('RBD', 'LBD')
-            ]
-        else:
-            raise SideNameError
+        match name:
+            case 'L':
+                vertices = {
+                    'LFD': (-self.size, self.size, self.size),
+                    'LFU': (-self.size, -self.size, self.size),
+                    'LBU': (-self.size, -self.size, -self.size),
+                    'LBD': (-self.size, self.size, -self.size)
+                }
+                edges = [
+                    ('LFD', 'LFU'),
+                    ('LFU', 'LBU'),
+                    ('LBU', 'LBD'),
+                    ('LBD', 'LFD')
+                ]
+            case 'R':
+                vertices = {
+                    'RFD': (self.size, self.size, self.size),
+                    'RFU': (self.size, -self.size, self.size),
+                    'RBU': (self.size, -self.size, -self.size),
+                    'RBD': (self.size, self.size, -self.size)
+                }
+                edges = [
+                    ('RFD', 'RFU'),
+                    ('RFU', 'RBU'),
+                    ('RBU', 'RBD'),
+                    ('RBD', 'RFD')
+                ]
+            case 'F':
+                vertices = {
+                    'LFD': (-self.size, self.size, self.size),
+                    'LFU': (-self.size, -self.size, self.size),
+                    'RFU': (self.size, -self.size, self.size),
+                    'RFD': (self.size, self.size, self.size)
+                }
+                edges = [
+                    ('LFD', 'LFU'),
+                    ('LFU', 'RFU'),
+                    ('RFU', 'RFD'),
+                    ('RFD', 'LFD')
+                ]
+            case 'B':
+                vertices = {
+                    'LBD': (-self.size, self.size, -self.size),
+                    'LBU': (-self.size, -self.size, -self.size),
+                    'RBU': (self.size, -self.size, -self.size),
+                    'RBD': (self.size, self.size, -self.size)
+                }
+                edges = [
+                    ('LBD', 'LBU'),
+                    ('LBU', 'RBU'),
+                    ('RBU', 'RBD'),
+                    ('RBD', 'LBD')
+                ]
+            case 'U':
+                vertices = {
+                    'LBU': (-self.size, -self.size, -self.size),
+                    'LFU': (-self.size, -self.size, self.size),
+                    'RFU': (self.size, -self.size, self.size),
+                    'RBU': (self.size, -self.size, -self.size)
+                }
+                edges = [
+                    ('LBU', 'LFU'),
+                    ('LFU', 'RFU'),
+                    ('RFU', 'RBU'),
+                    ('RBU', 'LBU')
+                ]
+            case 'D':
+                vertices = {
+                    'LBD': (-self.size, self.size, -self.size),
+                    'LFD': (-self.size, self.size, self.size),
+                    'RFD': (self.size, self.size, self.size),
+                    'RBD': (self.size, self.size, -self.size)
+                }
+                edges = [
+                    ('LBD', 'LFD'),
+                    ('LFD', 'RFD'),
+                    ('RFD', 'RBD'),
+                    ('RBD', 'LBD')
+                ]
+            case _:
+                raise SideNameError
 
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
         edges = [Edge(*edge) for edge in edges]
