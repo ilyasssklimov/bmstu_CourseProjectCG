@@ -1,3 +1,5 @@
+import src.general.config as config
+import src.utils.point as p
 from math import pi, sin, cos, sqrt
 
 
@@ -7,12 +9,21 @@ class Vector:
             self.x = finish.x - start.x
             self.y = finish.y - start.y
             self.z = finish.z - start.z
-        else:
+        elif isinstance(start, list):
+            self.x = start[0]
+            self.y = start[1]
+            self.z = start[2]
+        elif isinstance(start, p.Point | Vector):
             self.x = start.x
             self.y = start.y
             self.z = start.z
+        else:
+            raise ValueError('Incorrect value to constructor if vector')
 
     def __str__(self):
+        return f'Vector({self.x}, {self.y}, {self.z})'
+
+    def __repr__(self):
         return f'Vector({self.x}, {self.y}, {self.z})'
 
     def __neg__(self):
@@ -40,6 +51,17 @@ class Vector:
 
     def get_length(self):
         return sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+
+    def adjust(self, point_1, point_2):
+        vector = Vector(point_1, point_2)
+        scalar = scalar_multiplication(self, vector)
+        cosine = scalar / (self.get_length() * vector.get_length())
+        if cosine < 0:
+            self.negative()
+
+
+def scalar_multiplication(vector_1, vector_2):
+    return vector_1.x * vector_2.x + vector_1.y * vector_2.y + vector_1.z * vector_2.z
 
 
 class Angle:
@@ -150,11 +172,13 @@ def get_dist(p_1, p_2):
     return sqrt((p_2.x - p_1.x) ** 2 + (p_2.y - p_1.y) ** 2 + (p_2.z - p_1.z) ** 2)
 
 
-def get_plane_cosine(light, point, normal_point):
+def get_plane_cosine(light, point, normal):
     vector = Vector(light, point)
-    normal = Vector(normal_point)
-
-    scalar = abs(vector.x * normal.x + vector.y * normal.y + vector.z * normal.z)
+    scalar = scalar_multiplication(vector, normal)
     lengths = vector.get_length() * normal.get_length()
+    cosine = scalar / lengths
 
-    return scalar / lengths
+    if cosine >= config.SHADOW:
+        return cosine
+    else:
+        return config.SHADOW

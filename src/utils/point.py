@@ -37,6 +37,9 @@ class Point:
         self.z /= other
         return self
 
+    def __abs__(self):
+        return Point(abs(self.x), abs(self.y), abs(self.z))
+
     def move(self, point):
         self.x += point.x
         self.y += point.y
@@ -82,6 +85,11 @@ class Point:
 
     def get_homogenous_vector(self):
         return [self.x, self.y, self.z, 0]
+
+    def negative(self):
+        self.x = -self.x
+        self.y = -self.y
+        self.z = -self.z
 
 
 def divide_line_by_num(point_1, point_2, alpha):

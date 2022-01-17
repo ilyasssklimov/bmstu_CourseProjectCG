@@ -1,10 +1,10 @@
-from src.general.config import Config, EPS
+from src.general.config import Config, CubeConfig, EPS
 from src.models.details import Corners, Ribs, Centers
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QBrush, QColor
 from src.utils.point import Point
 from src.utils.matrix import MatrixPlane, MatrixBody
-from src.utils.mymath import Vector, Angle
+from src.utils.mymath import Vector, Angle, get_plane_cosine
 
 
 class Model:
@@ -25,28 +25,19 @@ class Model:
         self.viewer = [dx, dy, dz + 100000, 0]
         self.matrix_body = None
 
+        self.light_sources = []
+
         self.visible_sides = []
         self.set_visible_sides()
 
-        self.light_sides = []
-        self.light_sources = []
-
     def draw(self, painter):
-        def draw_details(sides, light_sources=None):
-            self.corners.draw(painter, sides, light_sources)
-            self.ribs.draw(painter, sides, light_sources)
-            self.centers.draw(painter, sides, light_sources)
-
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
+        shadows = None if not self.light_sources else self.count_shadows()
 
-        if self.light_sources:
-            light = [side for side in self.light_sides if side in self.visible_sides]
-            visible = [side for side in self.visible_sides if side not in self.light_sides]
-            draw_details(light, [Point(*[vertex for vertex in self.light_sources[:-1]])])
-            draw_details(visible)
-        else:
-            draw_details(self.visible_sides)
+        self.corners.draw(painter, self.visible_sides, shadows)
+        self.ribs.draw(painter, self.visible_sides, shadows)
+        self.centers.draw(painter, self.visible_sides, shadows)
 
     def draw_turning(self, painter, side, plastic_part):
         def draw_below_turning():
@@ -82,6 +73,26 @@ class Model:
     def get_static_plastic_part(self, side):
         return self.corners.get_static_plastic_part(side, self.n)
 
+    def count_shadows(self):
+        shadows = {}
+        for side in self.visible_sides:
+            shadows[side] = self.get_shadow(side)
+
+        return shadows
+
+    def get_shadow(self, position_side):
+        side = CubeConfig().get_sides()[position_side]
+        center = self.centers.sides_centers[position_side]
+        light = Point(*self.light_sources[0][:-1])
+
+        plane_points = [self.corners.carcass[key] for key in side]
+        normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
+        normal.adjust(center, Point(*self.matrix_center[:-1]))
+
+        cosine = get_plane_cosine(light, center, normal)
+
+        return cosine
+
     def scale(self, k):
         k = k if k else 1
         tmp = k / self.k
@@ -107,8 +118,6 @@ class Model:
         self.move(self.center_point)
 
         self.set_visible_sides()
-        if self.light_sources:
-            self.set_light_sides()
 
     def turn_oy(self, angle):
         self.move(-self.center_point)
@@ -120,8 +129,6 @@ class Model:
         self.move(self.center_point)
 
         self.set_visible_sides()
-        if self.light_sources:
-            self.set_light_sides()
 
     def turn_oz(self, angle):
         self.move(-self.center_point)
@@ -133,8 +140,6 @@ class Model:
         self.move(self.center_point)
 
         self.set_visible_sides()
-        if self.light_sources:
-            self.set_light_sides()
 
     def turn_ox_funcs(self, sin_angle, cos_angle):
         self.corners.turn_ox_funcs(sin_angle, cos_angle)
@@ -200,21 +205,16 @@ class Model:
         self.matrix_body = MatrixBody(coefficients)
         self.matrix_body.adjust(self.matrix_center)
 
-    def get_visible_sides(self, point):
-        self.set_matrix_body()
-        result = self.matrix_body.multiplication_vector(point)
-        sides = self.matrix_body.sides
-        return [side for side, value in zip(sides, result) if value > EPS]
-
     def set_visible_sides(self):
-        self.visible_sides = self.get_visible_sides(self.viewer)
+        self.set_matrix_body()
+        sides = self.matrix_body.sides
 
-    def set_light_sides(self):
-        self.light_sides = self.get_visible_sides(self.light_sources[0])
+        visible_res = self.matrix_body.multiplication_vector(self.viewer)
+        self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
 
     def add_light(self, point):
         self.light_sources.append(point.get_homogenous_vector())
-        self.set_light_sides()
+        self.set_visible_sides()
 
 
 class Cube(Model):

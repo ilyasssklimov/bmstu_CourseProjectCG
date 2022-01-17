@@ -1,15 +1,13 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QBrush
-
 import src.general.config as config
 from copy import deepcopy
 from src.utils.point import divide_line_by_num
-from src.utils.matrix import MatrixPlane
-from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_plane_cosine
+from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
 from src.utils.point import Point
 
 
-# TODO: наследовать детали от одного класса
+# TODO: наследовать детали от одного класса (возможно)
 # TODO: убрать дублирование кода, рефакторинг!
 
 
@@ -94,22 +92,17 @@ class Detail:
         elif len(self.name) == 3:
             self.name = reverse_replace_list(self.prev_name, old_letter, new_letter, side)
 
-    def fill_detail(self, painter, vertices, side, light=None):
-        if not light:
-            color = self.colors[side]
-        else:
-            sides = config.CubeConfig().get_sides()[self.name[0]]
-            plane_points = [self.vertices[vertex] for vertex in sides]
-            normal = Point(*MatrixPlane(plane_points).get_determinant()[:-1])
-            # print(light[0])
-            cosine = get_plane_cosine(light[0], self.get_center(), normal)
-            color = (int(color * cosine) for color in self.colors[side])
-            # color = (int(color * config.SHADOW) for color in self.colors[side])
-
+    def fill_shadow_detail(self, painter, vertices, color_side, shadow):
+        color = (int(color * shadow) for color in self.colors[color_side])
         painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
         painter.fill(vertices)
 
-    def draw(self, painter, visible_sides, light=None):
+    def fill_detail(self, painter, vertices, color_side):
+        color = self.colors[color_side]
+        painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
+        painter.fill(vertices)
+
+    def draw(self, painter, visible_sides, shadows=None):
         for side in visible_sides:
             if side in self.name:
                 vertices_pairs = []
@@ -119,7 +112,12 @@ class Detail:
                     vertices_pairs.append([start, finish])
 
                 vertices = get_vertices_by_pairs(vertices_pairs)
-                self.fill_detail(painter, vertices, self.name_for_color[self.name.index(side)], light)
+                color_side = self.name_for_color[self.name.index(side)]
+
+                if not shadows:
+                    self.fill_detail(painter, vertices, color_side)
+                else:
+                    self.fill_shadow_detail(painter, vertices, color_side, shadows[side])
 
     def draw_turning(self, painter, visible_sides, turning_side):
         stickers_centers = {}
@@ -154,11 +152,15 @@ class Detail:
             center += vertex.z
         return center / len(self.vertices)
 
-    def get_center(self):
-        center = Point()
-        for vertex in self.vertices.values():
-            center += vertex
-        return center / len(self.vertices)
+    def get_center_by_name(self, name):
+        center, count = Point(), 0
+
+        for vertex in self.vertices:
+            if name in vertex:
+                center += self.vertices[vertex]
+                count += 1
+
+        return center / count
 
     def get_vertex_by_name(self, name):
         set_name = set(name)
@@ -183,22 +185,20 @@ class Center(Detail):
         super().__init__(vertices, edges, offset, name)
         self.color = self.colors[name]
 
-    def fill_detail(self, painter, vertices=None, side=None, light=None):
-        if not light:
-            color = self.color
-        else:
-            side = config.CubeConfig().get_sides()[self.name[0]]
-            plane_points = [self.vertices[vertex] for vertex in side]
-            normal = Point(*MatrixPlane(plane_points).get_determinant()[:-1])
-
-            cosine = get_plane_cosine(light[0], self.get_center(), normal)
-            color = (int(color * cosine) for color in self.color)
-
+    def fill_shadow_detail(self, painter, vertices=None, color_side=None, shadow=None):
+        color = (int(color * shadow) for color in self.color)
         painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
         painter.fill(self.vertices.values())
 
-    def draw(self, painter, visible_sides, light=None):
-        self.fill_detail(painter, None, None, light)
+    def fill_detail(self, painter, vertices=None, color_side=None):
+        painter.setBrush(QBrush(QColor(*self.color), Qt.SolidPattern))
+        painter.fill(self.vertices.values())
+
+    def draw(self, painter, visible_sides, shadows=None):
+        if not shadows:
+            self.fill_detail(painter)
+        else:
+            self.fill_shadow_detail(painter, None, None, shadows[self.name[0]])
 
     def draw_turning(self, painter, visible_sides, turning_side):
         self.fill_detail(painter)
@@ -206,7 +206,8 @@ class Center(Detail):
 
 class Corners:
     def __init__(self, n):
-        self.carcass = self.init_carcass()
+        self.carcass = None
+        self.init_extra_points()
 
         cfg = config.CubeConfig(n)
         vertices, edges = cfg.get_eccentric_data()
@@ -216,17 +217,15 @@ class Corners:
         for key, value in positions.items():
             self.corners[key] = Corner(deepcopy(vertices), edges, Point(*value), key)
 
-    def init_carcass(self):
-        carcass = config.CubeConfig().get_carcass()
-        for key in carcass:
-            carcass[key].move(config.Config().center)
+    def init_extra_points(self):
+        self.carcass = config.CubeConfig().get_carcass()
+        for key in self.carcass:
+            self.carcass[key].move(config.Config().center)
 
-        return carcass
-
-    def draw(self, painter, visible_sides, light=None):
+    def draw(self, painter, visible_sides, shadows=None):
         for key in self.corners:
             if set(visible_sides) & set(key):
-                self.corners[key].draw(painter, visible_sides, light)
+                self.corners[key].draw(painter, visible_sides, shadows)
 
     def draw_below_turning(self, painter, visible_sides, side):
         for key in self.corners:
@@ -357,11 +356,11 @@ class Ribs:
                 for position in positions[key]:
                     self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key))
 
-    def draw(self, painter, visible_sides, light=None):
+    def draw(self, painter, visible_sides, shadows=None):
         for key in self.ribs:
             if set(visible_sides) & set(key):
                 for rib in self.ribs[key]:
-                    rib.draw(painter, visible_sides, light)
+                    rib.draw(painter, visible_sides, shadows)
 
     def draw_below_turning(self, painter, visible_sides, side):
         for key in self.ribs:
@@ -374,7 +373,7 @@ class Ribs:
         for key in self.ribs:
             if side in key:
                 for rib in self.ribs[key]:
-                    ribs_centers[rib] = rib.get_center()
+                    ribs_centers[rib] = rib.get_center_z()
 
         return ribs_centers
 
@@ -450,7 +449,8 @@ class Ribs:
 
 class Centers:
     def __init__(self, n):
-        self.sides_centers = self.init_sides_centers()
+        self.sides_centers = None
+        self.init_sides_centers()
         self.n = n
 
         self.centers = {}
@@ -464,17 +464,17 @@ class Centers:
                     self.centers[key].append(Center(deepcopy(vertices), edges, Point(*position), key))
 
     def init_sides_centers(self):
-        sides_centers = config.CubeConfig().get_sides_centers()
-        for key in sides_centers:
-            sides_centers[key].move(config.Config().center)
+        self.sides_centers = config.CubeConfig().get_sides_centers()
+        for key in self.sides_centers:
+            self.sides_centers[key].move(config.Config().center)
 
-        return sides_centers
+    def draw(self, painter, visible_sides, shadows=None):
+        if self.n == 2:
+            return
 
-    def draw(self, painter, visible_sides, light=None):
-        if self.n > 2:
-            for key in visible_sides:
-                for center in self.centers[key]:
-                    center.draw(painter, visible_sides, light)
+        for key in visible_sides:
+            for center in self.centers[key]:
+                center.draw(painter, visible_sides, shadows)
 
     def get_center(self, side):
         if self.n == 2:
@@ -482,7 +482,7 @@ class Centers:
 
         center_centers = {}
         for center in self.centers[side]:
-            center_centers[center] = center.get_center()
+            center_centers[center] = center.get_center_z()
 
         return center_centers
 

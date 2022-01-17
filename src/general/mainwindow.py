@@ -32,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.model = None
         self.k = 10
-        self.angle = 15
+        self.angle = 1  # 15
         self.speed = 2
         self.sizeModel.setCurrentText('3x3x3')
         self.load_model()
@@ -237,16 +237,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def add_light_source(self):
         cfg = Config()
-        test_point = Point(cfg.dx + 400, cfg.dy, cfg.dz)
+        test_point = Point(cfg.dx, cfg.dy, cfg.dz + 10000)
 
         self.light_sources.append(test_point)
-        # self.model.light_sources.append(test_point)
-
-        # pixmap = QPixmap("../inc/light.png")
-        # light_img = QLabel(self)
-        # light_img.setPixmap(pixmap)
-        # light_img.move(test_point.x, test_point.y)
-        # self.addWidget(light_img)
-
         self.model.add_light(test_point)
         self.update()

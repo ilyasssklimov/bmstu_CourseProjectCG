@@ -1,13 +1,10 @@
-# TODO: возможно убрать классы и сделать "голые" данные
-
-
 from src.utils.edge import Edge
 from src.general.errors import SideNameError
 from src.utils.point import Point
 
 
 EPS = 1e5
-SHADOW = 0.2
+SHADOW = 0.15
 
 
 class Config:
