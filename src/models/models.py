@@ -40,10 +40,10 @@ class Model:
         self.centers.draw(painter, self.visible_sides, shadows)
 
     def draw_turning(self, painter, side, plastic_part):
-        def draw_below_turning():
-            self.ribs.draw_below_turning(painter, self.visible_sides, side)
-            self.centers.draw(painter, self.visible_sides, None)
-            self.corners.draw_below_turning(painter, self.visible_sides, side)
+        def draw_below_turning(shadows_=None):
+            self.ribs.draw_below_turning(painter, self.visible_sides, side, shadows_)
+            self.centers.draw(painter, self.visible_sides, shadows_)
+            self.corners.draw_below_turning(painter, self.visible_sides, side, shadows_)
 
         def draw_static_plastic_part():
             painter.setBrush(QBrush(QColor('black'), Qt.SolidPattern))
@@ -51,14 +51,15 @@ class Model:
 
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
+        shadows = None if not self.light_sources else self.count_shadows()
 
         if side in self.visible_sides:
-            draw_below_turning()
+            draw_below_turning(shadows)
             draw_static_plastic_part()
             self.artist(painter, side)
         else:
             self.artist(painter, side)
-            draw_below_turning()
+            draw_below_turning(shadows)
 
     def artist(self, painter, side):
         corners = self.corners.get_centers(side)
@@ -68,7 +69,7 @@ class Model:
         details = sorted(eccentric, key=eccentric.get)
 
         for detail in details:
-            detail.draw_turning(painter, self.visible_sides, side)
+            detail.draw_turning(painter, self.visible_sides, side, self.light_sources)
 
     def get_static_plastic_part(self, side):
         return self.corners.get_static_plastic_part(side, self.n)
@@ -81,9 +82,12 @@ class Model:
         return shadows
 
     def get_shadow(self, position_side):
+        if not self.light_sources:
+            return None
+
         side = CubeConfig().get_sides()[position_side]
         center = self.centers.sides_centers[position_side]
-        light = Point(*self.light_sources[0][:-1])
+        light = self.light_sources[0]
 
         plane_points = [self.corners.carcass[key] for key in side]
         normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
@@ -213,7 +217,7 @@ class Model:
         self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
 
     def add_light(self, point):
-        self.light_sources.append(point.get_homogenous_vector())
+        self.light_sources.append(point)  # .get_homogenous_vector())
         self.set_visible_sides()
 
 

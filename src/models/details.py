@@ -119,7 +119,7 @@ class Detail:
                 else:
                     self.fill_shadow_detail(painter, vertices, color_side, shadows[side])
 
-    def draw_turning(self, painter, visible_sides, turning_side):
+    def draw_turning(self, painter, visible_sides, turning_side, light_sources=None):
         stickers_centers = {}
         sides_vertices = {}
         for side in self.sides:
@@ -200,7 +200,7 @@ class Center(Detail):
         else:
             self.fill_shadow_detail(painter, None, None, shadows[self.name[0]])
 
-    def draw_turning(self, painter, visible_sides, turning_side):
+    def draw_turning(self, painter, visible_sides, turning_side, light_sources=None):
         self.fill_detail(painter)
 
 
@@ -227,10 +227,10 @@ class Corners:
             if set(visible_sides) & set(key):
                 self.corners[key].draw(painter, visible_sides, shadows)
 
-    def draw_below_turning(self, painter, visible_sides, side):
+    def draw_below_turning(self, painter, visible_sides, side, shadows=None):
         for key in self.corners:
             if set(visible_sides) & set(key) and side not in key:
-                self.corners[key].draw(painter, visible_sides)
+                self.corners[key].draw(painter, visible_sides, shadows)
 
     def get_static_plastic_part(self, side, n):
         def get_carcass_vertices(src_vertices):
@@ -362,11 +362,11 @@ class Ribs:
                 for rib in self.ribs[key]:
                     rib.draw(painter, visible_sides, shadows)
 
-    def draw_below_turning(self, painter, visible_sides, side):
+    def draw_below_turning(self, painter, visible_sides, side, shadows=None):
         for key in self.ribs:
             if set(visible_sides) & set(key) and side not in key:
                 for rib in self.ribs[key]:
-                    rib.draw(painter, visible_sides)
+                    rib.draw(painter, visible_sides, shadows)
 
     def get_centers(self, side):
         ribs_centers = {}
