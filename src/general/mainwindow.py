@@ -122,6 +122,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.scaleSlider.setValue(10)
         self.k = 10
         model = self.models.currentText()
+        self.right_light.setCheckState(False)
+        self.left_light.setCheckState(False)
 
         match model:
             case 'Кубик Рубика':
@@ -129,6 +131,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.model.turn_oy(45)
                 self.model.turn_ox(-30)
                 self.update()
+            case 'Пирамидка':
+                pass
+                # self.model =
             case _:
                 print('Another model')
 

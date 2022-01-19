@@ -263,19 +263,20 @@ class Center(Detail):
 
 class Corners:
     def __init__(self, n):
+        self.cfg = config.CubeConfig(n)
+
         self.carcass = None
         self.init_extra_points()
 
-        cfg = config.CubeConfig(n)
-        vertices, edges = cfg.get_eccentric_data()
-        positions = cfg.get_offset_corners()
+        vertices, edges = self.cfg.get_eccentric_data()
+        positions = self.cfg.get_offset_corners()
 
         self.corners = {}
         for key, value in positions.items():
             self.corners[key] = Corner(deepcopy(vertices), edges, Point(*value), key)
 
     def init_extra_points(self):
-        self.carcass = config.CubeConfig().get_carcass()
+        self.carcass = self.cfg.get_carcass()
         for key in self.carcass:
             self.carcass[key].move(config.Config().center)
 
@@ -301,8 +302,8 @@ class Corners:
 
             return vertices
 
-        turning_vertices = config.CubeConfig().get_exchanges_corners()[side]
-        opposite_side = config.CubeConfig().get_opposite(side)
+        turning_vertices = self.cfg.get_exchanges_corners()[side]
+        opposite_side = self.cfg.get_opposite(side)
         below_vertices = [vertex.replace(side, opposite_side) for vertex in turning_vertices]
 
         upper_vertices = get_carcass_vertices(turning_vertices)
@@ -392,7 +393,7 @@ class Corners:
                 self.corners[key].update_sides(side, direction)
 
     def create_plane_points(self):
-        sides = config.CubeConfig().get_sides()
+        sides = self.cfg.get_sides()
         points = {}
 
         for key, value in sides.items():

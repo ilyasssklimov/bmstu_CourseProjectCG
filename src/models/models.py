@@ -234,3 +234,8 @@ class Cube(Model):
         centers = Centers(n)
 
         super().__init__(corners, ribs, centers, n)
+
+
+class Pyramid(Model):
+    def __init__(self, n):
+        pass
