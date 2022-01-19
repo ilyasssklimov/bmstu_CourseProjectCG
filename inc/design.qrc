@@ -1,8 +1,0 @@
-<RCC>
-  <qresource prefix="design">
-    <file>minus.jpg</file>
-    <file>plus.jpg</file>
-    <file>clockwise.png</file>
-    <file>counterclock_wise.png</file>
-  </qresource>
-</RCC>
