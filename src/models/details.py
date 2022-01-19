@@ -3,7 +3,9 @@ from PyQt5.QtGui import QColor, QBrush
 import src.general.config as config
 from copy import deepcopy
 from src.utils.point import divide_line_by_num
-from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list
+from src.utils.matrix import MatrixPlane
+from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_plane_cosine
+from src.utils.mymath import Vector
 from src.utils.point import Point
 
 
@@ -119,7 +121,7 @@ class Detail:
                 else:
                     self.fill_shadow_detail(painter, vertices, color_side, shadows[side])
 
-    def draw_turning(self, painter, visible_sides, turning_side, light_sources=None):
+    def draw_turning(self, painter, visible_sides, turning_side, model_center=None, light_sources=None):
         stickers_centers = {}
         sides_vertices = {}
         for side in self.sides:
@@ -140,7 +142,12 @@ class Detail:
         sides = sorted(stickers_centers, key=stickers_centers.get)
         for side in sides:
             if side in self.name:
-                self.fill_detail(painter, sides_vertices[side], self.name_for_color[self.name.index(side)])
+                color_side = self.name_for_color[self.name.index(side)]
+                if not light_sources:
+                    self.fill_detail(painter, sides_vertices[side], color_side)
+                else:
+                    shadow = self.get_shadow(side, model_center, light_sources, sides_vertices[side])
+                    self.fill_shadow_detail(painter, sides_vertices[side], color_side, shadow)
 
         opposite_side = config.CubeConfig().get_opposite(turning_side)
         if opposite_side in visible_sides:
@@ -152,15 +159,16 @@ class Detail:
             center += vertex.z
         return center / len(self.vertices)
 
-    def get_center_by_name(self, name):
-        center, count = Point(), 0
+    def get_center_by_name(self, vertices=None):
+        if not vertices:
+            return None
 
-        for vertex in self.vertices:
-            if name in vertex:
-                center += self.vertices[vertex]
-                count += 1
+        center = Point()
 
-        return center / count
+        for vertex in vertices:
+            center += vertex
+
+        return center / len(vertices)
 
     def get_vertex_by_name(self, name):
         set_name = set(name)
@@ -168,6 +176,21 @@ class Detail:
             if set(key) == set_name:
                 return self.vertices[key]
         return None
+
+    def get_shadow(self, name, model_center, light_sources, vertices=None):
+        if not light_sources or not vertices:
+            return None
+
+        center = self.get_center_by_name(vertices)
+        light = light_sources[0]
+
+        plane_points = [vertices[0], *vertices[2:-1]]
+        normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
+        normal.adjust(center, Point(*model_center))
+
+        cosine = get_plane_cosine(light, center, normal)
+
+        return cosine
 
 
 class Corner(Detail):
@@ -200,8 +223,37 @@ class Center(Detail):
         else:
             self.fill_shadow_detail(painter, None, None, shadows[self.name[0]])
 
-    def draw_turning(self, painter, visible_sides, turning_side, light_sources=None):
-        self.fill_detail(painter)
+    def draw_turning(self, painter, visible_sides, turning_side, model_center=None, light_sources=None):
+        if not light_sources:
+            self.fill_detail(painter)
+        else:
+            shadow = self.get_shadow(self.name[0], model_center, light_sources)
+            self.fill_shadow_detail(painter, None, None, shadow)
+
+    def get_center_by_name(self, vertices=None):
+        center = Point()
+
+        for vertex in self.vertices:
+            center += self.vertices[vertex]
+
+        return center / len(self.vertices)
+
+    def get_shadow(self, name, model_center, light_sources, vertices=None):
+        if not light_sources:
+            return None
+
+        center = self.get_center_by_name()
+        light = light_sources[0]
+
+        vertices = list(self.vertices.values())
+        plane_points = [vertices[0], *vertices[2:]]
+
+        normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
+        normal.adjust(center, Point(*model_center))
+
+        cosine = get_plane_cosine(light, center, normal)
+
+        return cosine
 
 
 class Corners:

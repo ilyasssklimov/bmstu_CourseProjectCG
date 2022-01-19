@@ -69,7 +69,7 @@ class Model:
         details = sorted(eccentric, key=eccentric.get)
 
         for detail in details:
-            detail.draw_turning(painter, self.visible_sides, side, self.light_sources)
+            detail.draw_turning(painter, self.visible_sides, side, self.matrix_center[:-1], self.light_sources)
 
     def get_static_plastic_part(self, side):
         return self.corners.get_static_plastic_part(side, self.n)
@@ -217,7 +217,7 @@ class Model:
         self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
 
     def add_light(self, point):
-        self.light_sources.append(point)  # .get_homogenous_vector())
+        self.light_sources.append(point)
         self.set_visible_sides()
 
 
