@@ -87,15 +87,19 @@ class Model:
 
         side = CubeConfig().get_sides()[position_side]
         center = self.centers.sides_centers[position_side]
-        light = self.light_sources[0]
 
         plane_points = [self.corners.carcass[key] for key in side]
         normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
         normal.adjust(center, Point(*self.matrix_center[:-1]))
 
-        cosine = get_plane_cosine(light, center, normal)
+        cosine = 0
+        for light in self.light_sources:
+            cosine += get_plane_cosine(light, center, normal)
 
-        return cosine
+        if cosine <= 1:
+            return cosine
+        else:
+            return 1
 
     def scale(self, k):
         k = k if k else 1
@@ -218,7 +222,9 @@ class Model:
 
     def add_light(self, point):
         self.light_sources.append(point)
-        self.set_visible_sides()
+
+    def del_light(self, point):
+        self.light_sources.remove(point)
 
 
 class Cube(Model):

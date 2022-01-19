@@ -543,52 +543,11 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="add_light">
-    <property name="geometry">
-     <rect>
-      <x>1190</x>
-      <y>690</y>
-      <width>41</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="cursor">
-     <cursorShape>PointingHandCursor</cursorShape>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);
-image: url(:/design/plus.jpg);</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="count_lights">
-    <property name="geometry">
-     <rect>
-      <x>1120</x>
-      <y>690</y>
-      <width>51</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-    <property name="maximum">
-     <number>2</number>
-    </property>
-   </widget>
    <widget class="QLabel" name="add_light_label">
     <property name="geometry">
      <rect>
       <x>1110</x>
-      <y>630</y>
+      <y>650</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -611,26 +570,6 @@ image: url(:/design/plus.jpg);</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="delete_light">
-    <property name="geometry">
-     <rect>
-      <x>1230</x>
-      <y>690</y>
-      <width>41</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="cursor">
-     <cursorShape>PointingHandCursor</cursorShape>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);
-image: url(:/design/minus.jpg);</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="mixButton">
     <property name="geometry">
      <rect>
@@ -647,6 +586,42 @@ image: url(:/design/minus.jpg);</string>
     </property>
     <property name="text">
      <string>Случайная позиция</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="right_light">
+    <property name="geometry">
+     <rect>
+      <x>1110</x>
+      <y>710</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Справа</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="left_light">
+    <property name="geometry">
+     <rect>
+      <x>1200</x>
+      <y>710</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Слева</string>
     </property>
    </widget>
   </widget>

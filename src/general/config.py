@@ -24,6 +24,9 @@ class Config:
         self.dz = 0
         self.center = Point(self.dx, self.dy, self.dz)
 
+        self.right_light = Point(self.dx + 1000, self.dy, self.dz + 1000)
+        self.left_light = Point(self.dx - 1000, self.dy, self.dz + 1000)
+
 
 class CubeConfig:
     def __init__(self, n=3):

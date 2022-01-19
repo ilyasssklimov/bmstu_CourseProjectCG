@@ -182,15 +182,19 @@ class Detail:
             return None
 
         center = self.get_center_by_name(vertices)
-        light = light_sources[0]
 
         plane_points = [vertices[0], *vertices[2:-1]]
         normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
         normal.adjust(center, Point(*model_center))
 
-        cosine = get_plane_cosine(light, center, normal)
+        cosine = 0
+        for light in light_sources:
+            cosine += get_plane_cosine(light, center, normal)
 
-        return cosine
+        if cosine <= 1:
+            return cosine
+        else:
+            return 1
 
 
 class Corner(Detail):
@@ -243,7 +247,6 @@ class Center(Detail):
             return None
 
         center = self.get_center_by_name()
-        light = light_sources[0]
 
         vertices = list(self.vertices.values())
         plane_points = [vertices[0], *vertices[2:]]
@@ -251,7 +254,9 @@ class Center(Detail):
         normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
         normal.adjust(center, Point(*model_center))
 
-        cosine = get_plane_cosine(light, center, normal)
+        cosine = 0
+        for light in light_sources:
+            cosine += get_plane_cosine(light, center, normal)
 
         return cosine
 

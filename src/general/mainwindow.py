@@ -42,8 +42,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cfg = Config()
         self.viewer = Point(self.cfg.dx, self.cfg.dy, self.cfg.dz)
 
-        self.light_sources = []
-
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.turn_side)
         self.duration = 0
@@ -75,6 +73,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             QtCore.Qt.Key_D: ('R', -1)
         }
 
+        self.right_light_point = Config().right_light
+        self.left_light_point = Config().left_light
+
     def set_connects_to_buttons(self):
         self.mixButton.clicked.connect(self.mix_model)
 
@@ -92,7 +93,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.down_.clicked.connect(lambda: self.start_turning_side('D', -1))
         self.back_.clicked.connect(lambda: self.start_turning_side('B', -1))
 
-        self.add_light.clicked.connect(self.add_light_source)
+        # self.add_light.clicked.connect(self.add_light_source)
+        self.right_light.stateChanged.connect(self.change_right_light)
+        self.left_light.stateChanged.connect(self.change_left_light)
 
     def change_turn_buttons_color(self, mode='standard'):
         colors = get_colors(mode)
@@ -235,10 +238,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if event.key() in self.turning_keys and self.duration == 0:
             self.start_turning_side(*self.turning_keys[event.key()])
 
-    def add_light_source(self):
-        cfg = Config()
-        test_point = Point(cfg.dx, cfg.dy, cfg.dz + 10000)
-
-        self.light_sources.append(test_point)
-        self.model.add_light(test_point)
+    def add_light_source(self, point):
+        self.model.add_light(point)
         self.update()
+
+    def delete_light_source(self, point):
+        self.model.del_light(point)
+        self.update()
+
+    def change_right_light(self):
+        if self.right_light.isChecked():
+            self.add_light_source(self.right_light_point)
+        else:
+            self.delete_light_source(self.right_light_point)
+
+    def change_left_light(self):
+        if self.left_light.isChecked():
+            self.add_light_source(self.left_light_point)
+        else:
+            self.delete_light_source(self.left_light_point)
