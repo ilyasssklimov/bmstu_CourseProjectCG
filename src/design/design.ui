@@ -591,7 +591,7 @@
    <widget class="QCheckBox" name="right_light">
     <property name="geometry">
      <rect>
-      <x>1110</x>
+      <x>1190</x>
       <y>710</y>
       <width>81</width>
       <height>20</height>
@@ -609,7 +609,7 @@
    <widget class="QCheckBox" name="left_light">
     <property name="geometry">
      <rect>
-      <x>1200</x>
+      <x>1110</x>
       <y>710</y>
       <width>81</width>
       <height>20</height>
