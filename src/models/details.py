@@ -258,7 +258,10 @@ class Center(Detail):
         for light in light_sources:
             cosine += get_plane_cosine(light, center, normal)
 
-        return cosine
+        if cosine <= 1:
+            return cosine
+        else:
+            return 1
 
 
 class Corners:
