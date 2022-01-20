@@ -1,4 +1,4 @@
-from src.general.config import Config, CubeConfig, EPS
+from src.general.config import Config, CubeConfig, EPS, CUBE, PYRAMID, MEGAMINX
 from src.models.details import Corners, Ribs, Centers
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QBrush, QColor
@@ -8,7 +8,6 @@ from src.utils.mymath import Vector, Angle, get_plane_cosine
 
 
 class Model:
-    # TODO: добавить матрицы преобразований (и для координат, и для матрицы тела)
     def __init__(self, corners, ribs, centers, n):
         self.n = n
         self.corners = corners
@@ -229,13 +228,17 @@ class Model:
 
 class Cube(Model):
     def __init__(self, n):
-        corners = Corners(n)
-        ribs = Ribs(n)
-        centers = Centers(n)
+        corners = Corners(n, CUBE)
+        ribs = Ribs(n, CUBE)
+        centers = Centers(n, CUBE)
 
         super().__init__(corners, ribs, centers, n)
 
 
 class Pyramid(Model):
     def __init__(self, n):
-        pass
+        centers = Centers(n, PYRAMID)
+        ribs = Centers(n, PYRAMID)
+        corners = Centers(n, PYRAMID)
+
+        super().__init__(corners, ribs, centers, n)

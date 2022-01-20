@@ -1,16 +1,11 @@
-from time import sleep
-
-from PyQt5.QtCore import QRect, QPoint, Qt
-from PyQt5.QtGui import QColor, QRadialGradient, QBrush, QPen, QPixmap
+from PyQt5.QtCore import QRect, QPoint
+from PyQt5.QtGui import QColor, QRadialGradient, QBrush
 from PyQt5 import QtWidgets, QtCore
-from random import choice
 
-from PyQt5.QtWidgets import QLabel
-
-from src.general.config import Config, get_colors
+from src.general.config import Config, get_colors, CUBE, PYRAMID, MEGAMINX
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
-from src.models.models import Cube
+from src.models.models import Cube, Pyramid
 from src.utils.mymath import sign
 from src.utils.point import Point
 
@@ -51,6 +46,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.loadButton.clicked.connect(self.load_model)
         self.scaleSlider.valueChanged.connect(self.scale_model)
+        self.models.currentTextChanged.connect(self.load_model)
         self.sizeModel.currentTextChanged.connect(self.load_model)
 
         self.rotate_y_.clicked.connect(lambda: self.turn_model_oy(self.angle))
@@ -93,7 +89,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.down_.clicked.connect(lambda: self.start_turning_side('D', -1))
         self.back_.clicked.connect(lambda: self.start_turning_side('B', -1))
 
-        # self.add_light.clicked.connect(self.add_light_source)
         self.right_light.stateChanged.connect(self.change_right_light)
         self.left_light.stateChanged.connect(self.change_left_light)
 
@@ -125,17 +120,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.right_light.setCheckState(False)
         self.left_light.setCheckState(False)
 
-        match model:
-            case 'Кубик Рубика':
-                self.model = Cube(int(self.sizeModel.currentText().split('x')[0]))
-                self.model.turn_oy(45)
-                self.model.turn_ox(-30)
-                self.update()
-            case 'Пирамидка':
-                pass
-                # self.model =
-            case _:
-                print('Another model')
+        if model == CUBE:
+            self.model = Cube(int(self.sizeModel.currentText().split('x')[0]))
+            self.model.turn_oy(45)
+            self.model.turn_ox(-30)
+            self.update()
+        elif model == PYRAMID:
+            self.model = Pyramid(int(self.sizeModel.currentText().split('x')[0]))
+            self.update()
+        elif model == MEGAMINX:
+            print('megaminx')
 
     def mix_model(self):
         print('Temporarily does\'not work :(')

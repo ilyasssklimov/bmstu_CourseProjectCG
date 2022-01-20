@@ -15,15 +15,16 @@ from src.utils.point import Point
 
 class Detail:
     def __init__(self, vertices, edges, offset, name, eccentric=True):
+        self.cfg = config.CubeConfig()
         self.vertices = vertices
         self.edges = edges
         self.name = None
         self.prev_name = None
         self.set_name(name)
         self.name_for_color = list(name)
-        self.colors = config.CubeConfig().get_center_colors()
+        self.colors = self.cfg.get_center_colors()
         if eccentric:
-            self.sides = config.CubeConfig().get_eccentric_detail_sides()
+            self.sides = self.cfg.get_eccentric_detail_sides()
 
         self.move(offset)
         self.move(config.Config().center)
@@ -72,7 +73,7 @@ class Detail:
         self.name = list(name)
 
     def update_sides(self, side, direction):
-        exchange = config.CubeConfig().get_exchanges_centers()[side]
+        exchange = self.cfg.get_exchanges_centers()[side]
 
         dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
         saved_ind = -1 if direction > 0 else 0
@@ -149,7 +150,7 @@ class Detail:
                     shadow = self.get_shadow(side, model_center, light_sources, sides_vertices[side])
                     self.fill_shadow_detail(painter, sides_vertices[side], color_side, shadow)
 
-        opposite_side = config.CubeConfig().get_opposite(turning_side)
+        opposite_side = self.cfg.get_opposite(turning_side)
         if opposite_side in visible_sides:
             self.fill_detail(painter, sides_vertices[opposite_side], 'black')
 
@@ -265,8 +266,11 @@ class Center(Detail):
 
 
 class Corners:
-    def __init__(self, n):
-        self.cfg = config.CubeConfig(n)
+    def __init__(self, n, model_name):
+        if model_name == config.CUBE:
+            self.cfg = config.CubeConfig(n)
+        else:
+            raise ValueError('Invalid model name param')
 
         self.carcass = None
         self.init_extra_points()
@@ -375,7 +379,7 @@ class Corners:
                 self.corners[key].turn_oy(angle)
 
     def update_sides(self, side, direction):
-        exchange = config.CubeConfig().get_exchanges_corners()[side]
+        exchange = self.cfg.get_exchanges_corners()[side]
 
         dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
         saved_ind = -1 if direction > 0 else 0
@@ -406,12 +410,16 @@ class Corners:
 
 
 class Ribs:
-    def __init__(self, n):
+    def __init__(self, n, model_name):
+        if model_name == config.CUBE:
+            self.cfg = config.CubeConfig(n)
+        else:
+            raise ValueError('Invalid model name param')
+
         self.ribs = {}
         if n > 2:
-            cfg = config.CubeConfig(n)
-            vertices, edges = cfg.get_eccentric_data()
-            positions = cfg.get_offset_ribs()
+            vertices, edges = self.cfg.get_eccentric_data()
+            positions = self.cfg.get_offset_ribs()
             for key, value in positions.items():
                 self.ribs[key] = []
                 for position in positions[key]:
@@ -485,7 +493,7 @@ class Ribs:
                     rib.turn_oy(angle)
 
     def update_sides(self, side, direction):
-        exchange = config.CubeConfig().get_exchanges_ribs()[side]
+        exchange = self.cfg.get_exchanges_ribs()[side]
 
         dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
         saved_ind = -1 if direction > 0 else 0
@@ -509,23 +517,27 @@ class Ribs:
 
 
 class Centers:
-    def __init__(self, n):
+    def __init__(self, n, model_name):
+        if model_name == config.CUBE:
+            self.cfg = config.CubeConfig(n)
+        else:
+            raise ValueError('Invalid model name param')
+
         self.sides_centers = None
         self.init_sides_centers()
         self.n = n
 
         self.centers = {}
         if n > 2:
-            cfg = config.CubeConfig(n)
-            positions = cfg.get_offset_centers()
+            positions = self.cfg.get_offset_centers()
             for key, value in positions.items():
-                vertices, edges = cfg.get_center_data(key)
+                vertices, edges = self.cfg.get_center_data(key)
                 self.centers[key] = []
                 for position in positions[key]:
                     self.centers[key].append(Center(deepcopy(vertices), edges, Point(*position), key))
 
     def init_sides_centers(self):
-        self.sides_centers = config.CubeConfig().get_sides_centers()
+        self.sides_centers = self.cfg.get_sides_centers()
         for key in self.sides_centers:
             self.sides_centers[key].move(config.Config().center)
 

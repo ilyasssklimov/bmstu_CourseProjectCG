@@ -404,7 +404,7 @@ class PyramidConfig:
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
 
         return vertices
-    
+
     '''
     def get_center_data(self, name):
         match name:
