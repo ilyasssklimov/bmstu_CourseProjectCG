@@ -1,3 +1,4 @@
+from math import sqrt
 from src.utils.edge import Edge
 from src.general.errors import SideNameError
 from src.utils.point import Point
@@ -29,6 +30,21 @@ class Config:
 
         self.right_light = Point(self.dx + 1000, self.dy, self.dz + 1000)
         self.left_light = Point(self.dx - 1000, self.dy, self.dz + 1000)
+
+
+def get_colors(mode='standard'):
+    match mode:
+        case 'standard':
+            return {
+                'R': 'red',
+                'L': 'orange',
+                'U': 'blue',
+                'D': 'green',
+                'F': 'white',
+                'B': 'yellow'
+            }
+        case _:
+            raise ValueError('Incorrect mode to get colors')
 
 
 class CubeConfig:
@@ -372,26 +388,24 @@ class CubeConfig:
         return colors
 
 
-def get_colors(mode='standard'):
-    match mode:
-        case 'standard':
-            return {
-                'R': 'red',
-                'L': 'orange',
-                'U': 'blue',
-                'D': 'green',
-                'F': 'white',
-                'B': 'yellow'
-            }
-        case _:
-            raise ValueError('Incorrect mode to get colors')
-
-
 class PyramidConfig:
     def __init__(self, n=3):
         self.n = n
         self.size = Config().size / self.n
 
+    def get_carcass(self):
+        size = Config().size
+        vertices = {
+            'LRF': (0, -size, 0),
+            'LFD': (-size, size, size / sqrt(3)),
+            'RFD': (size, size, size / sqrt(3)),
+            'LRD': (0, size, -size / sqrt(3))
+        }
+        vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
+
+        return vertices
+    
+    '''
     def get_center_data(self, name):
         match name:
             case 'L':
@@ -433,32 +447,6 @@ class PyramidConfig:
                     ('RFU', 'RFD'),
                     ('RFD', 'LFD')
                 ]
-            case 'B':
-                vertices = {
-                    'LBD': (-self.size, self.size, -self.size),
-                    'LBU': (-self.size, -self.size, -self.size),
-                    'RBU': (self.size, -self.size, -self.size),
-                    'RBD': (self.size, self.size, -self.size)
-                }
-                edges = [
-                    ('LBD', 'LBU'),
-                    ('LBU', 'RBU'),
-                    ('RBU', 'RBD'),
-                    ('RBD', 'LBD')
-                ]
-            case 'U':
-                vertices = {
-                    'LBU': (-self.size, -self.size, -self.size),
-                    'LFU': (-self.size, -self.size, self.size),
-                    'RFU': (self.size, -self.size, self.size),
-                    'RBU': (self.size, -self.size, -self.size)
-                }
-                edges = [
-                    ('LBU', 'LFU'),
-                    ('LFU', 'RFU'),
-                    ('RFU', 'RBU'),
-                    ('RBU', 'LBU')
-                ]
             case 'D':
                 vertices = {
                     'LBD': (-self.size, self.size, -self.size),
@@ -479,7 +467,7 @@ class PyramidConfig:
         edges = [Edge(*edge) for edge in edges]
 
         return vertices, edges
-
+    '''
     '''
     def get_eccentric_data(self):
         vertices = {
@@ -673,23 +661,6 @@ class PyramidConfig:
         }
 
         return exchanges_centers
-
-    def get_carcass(self):
-        size = Config().size
-        vertices = {
-            'LFD': (-size, size, size),
-            'RFD': (size, size, size),
-            'RFU': (size, -size, size),
-            'LFU': (-size, -size, size),
-
-            'LBD': (-size, size, -size),
-            'RBD': (size, size, -size),
-            'RBU': (size, -size, -size),
-            'LBU': (-size, -size, -size),
-        }
-        vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
-
-        return vertices
 
     def get_sides(self):
         # you can choose another
