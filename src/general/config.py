@@ -5,6 +5,9 @@ from src.utils.point import Point
 
 EPS = 1e5
 SHADOW = 0.15
+CUBE = 'Кубик Рубика'
+PYRAMID = 'Пирамидка'
+MEGAMINX = 'Мегаминкс'
 
 
 class Config:
