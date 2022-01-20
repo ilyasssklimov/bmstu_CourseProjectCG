@@ -1,6 +1,3 @@
-# TODO: сделать классы ошибок
-
-
 class SideNameError(Exception):
     def __init__(self, *args):
         if args:
