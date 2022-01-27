@@ -1,4 +1,4 @@
-from src.general.config import Config, CubeConfig, EPS, CUBE, PYRAMID, MEGAMINX
+from src.general.config import Config, CubeConfig, PyramidConfig, EPS, CUBE, PYRAMID, MEGAMINX
 from src.models.details import Corners, Ribs, Centers
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QBrush, QColor
@@ -235,10 +235,12 @@ class Cube(Model):
         super().__init__(corners, ribs, centers, n)
 
 
-class Pyramid(Model):
+class Pyramid:
     def __init__(self, n):
         centers = Centers(n, PYRAMID)
-        ribs = Centers(n, PYRAMID)
-        corners = Centers(n, PYRAMID)
+        ribs = Centers(n, CUBE)
+        corners = Centers(n, CUBE)
 
-        super().__init__(corners, ribs, centers, n)
+        # super().__init__(corners, ribs, centers, n)
+
+
