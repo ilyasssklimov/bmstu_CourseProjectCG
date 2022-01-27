@@ -389,6 +389,11 @@ class CubeConfig:
 
 
 class PyramidConfig:
+    """
+    Длина стороны детали - size
+    Высота - size * sqrt(3) / 2
+    Радиус вписанной окружности - size / sqrt(3)
+    """
     def __init__(self, n=3):
         self.n = n
         self.size = Config().size / self.n
@@ -396,7 +401,7 @@ class PyramidConfig:
     def get_carcass(self):
         size = Config().size
         vertices = {
-            'LRF': (0, -size, 0),
+            'LRF': (0, -2 * size, 0),
             'LFD': (-size, size, size / sqrt(3)),
             'RFD': (size, size, size / sqrt(3)),
             'LRD': (0, size, -size / sqrt(3))
@@ -405,9 +410,21 @@ class PyramidConfig:
 
         return vertices
 
-    '''
     def get_center_data(self, name):
         match name:
+            case 'F':
+                vertices = {
+                    'LFD': (-self.size, self.size, self.size),
+                    'LFU': (-self.size, -self.size, self.size),
+                    'RFU': (self.size, -self.size, self.size),
+                    'RFD': (self.size, self.size, self.size)
+                }
+                edges = [
+                    ('LFD', 'LFU'),
+                    ('LFU', 'RFU'),
+                    ('RFU', 'RFD'),
+                    ('RFD', 'LFD')
+                ]
             case 'L':
                 vertices = {
                     'LFD': (-self.size, self.size, self.size),
@@ -434,19 +451,6 @@ class PyramidConfig:
                     ('RBU', 'RBD'),
                     ('RBD', 'RFD')
                 ]
-            case 'F':
-                vertices = {
-                    'LFD': (-self.size, self.size, self.size),
-                    'LFU': (-self.size, -self.size, self.size),
-                    'RFU': (self.size, -self.size, self.size),
-                    'RFD': (self.size, self.size, self.size)
-                }
-                edges = [
-                    ('LFD', 'LFU'),
-                    ('LFU', 'RFU'),
-                    ('RFU', 'RFD'),
-                    ('RFD', 'LFD')
-                ]
             case 'D':
                 vertices = {
                     'LBD': (-self.size, self.size, -self.size),
@@ -467,7 +471,7 @@ class PyramidConfig:
         edges = [Edge(*edge) for edge in edges]
 
         return vertices, edges
-    '''
+
     '''
     def get_eccentric_data(self):
         vertices = {
