@@ -120,13 +120,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.right_light.setCheckState(False)
         self.left_light.setCheckState(False)
 
+        size = int(self.sizeModel.currentText().split('x')[0])
         if model == CUBE:
-            self.model = Cube(int(self.sizeModel.currentText().split('x')[0]))
+            self.model = Cube(size)
             self.model.turn_oy(45)
             self.model.turn_ox(-30)
             self.update()
         elif model == PYRAMID:
-            self.model = Pyramid(int(self.sizeModel.currentText().split('x')[0]))
+            self.model = Pyramid(size)
             self.update()
         elif model == MEGAMINX:
             print('megaminx')

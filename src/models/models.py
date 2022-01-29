@@ -236,11 +236,56 @@ class Cube(Model):
 
 
 class Pyramid:
+    """
     def __init__(self, n):
         centers = Centers(n, PYRAMID)
         ribs = Centers(n, CUBE)
         corners = Centers(n, CUBE)
 
         # super().__init__(corners, ribs, centers, n)
+    """
 
+    def __init__(self, n):
+        self.n = n
+        self.corners = Corners(n, PYRAMID)
+        self.ribs = Ribs(n, PYRAMID)
+        self.visible_sides = ['L', 'R', 'F', 'D']
 
+        cfg = Config()
+        dx, dy, dz = cfg.dx, cfg.dy, cfg.dz
+        self.center_point = Point(dx, dy, dz)
+
+    def draw(self, painter):
+        pen = QPen(Qt.black, 6)
+        painter.setPen(pen)
+
+        self.corners.draw(painter, self.visible_sides)
+        self.ribs.draw(painter, self.visible_sides)
+
+    def move(self, point):
+        self.corners.move(point)
+        self.ribs.move(point)
+
+    def turn_ox(self, angle):
+        self.move(-self.center_point)
+
+        self.corners.turn_ox(angle)
+        self.ribs.turn_ox(angle)
+
+        self.move(self.center_point)
+
+    def turn_oy(self, angle):
+        self.move(-self.center_point)
+
+        self.corners.turn_oy(angle)
+        self.ribs.turn_oy(angle)
+
+        self.move(self.center_point)
+
+    def turn_oz(self, angle):
+        self.move(-self.center_point)
+
+        self.corners.turn_oz(angle)
+        self.ribs.turn_oz(angle)
+
+        self.move(self.center_point)

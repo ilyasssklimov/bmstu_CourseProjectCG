@@ -14,8 +14,14 @@ from src.utils.point import Point
 
 
 class Detail:
-    def __init__(self, vertices, edges, offset, name, eccentric=True):
-        self.cfg = config.CubeConfig()
+    def __init__(self, vertices, edges, offset, name, model_name, eccentric=True):
+        if model_name == config.CUBE:
+            self.cfg = config.CubeConfig()
+        elif model_name == config.PYRAMID:
+            self.cfg = config.PyramidConfig()
+        else:
+            raise ValueError('Invalid model name param')
+
         self.vertices = vertices
         self.edges = edges
         self.name = None
@@ -102,8 +108,8 @@ class Detail:
 
     def fill_detail(self, painter, vertices, color_side):
         color = self.colors[color_side]
-        painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
-        painter.fill(vertices)
+        # painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
+        # painter.fill(vertices)
 
     def draw(self, painter, visible_sides, shadows=None):
         for side in visible_sides:
@@ -112,6 +118,7 @@ class Detail:
                 for key in self.sides[side]:
                     edge = self.edges[key]
                     start, finish = self.vertices[edge.first], self.vertices[edge.second]
+                    painter.pcreate_line(start, finish)
                     vertices_pairs.append([start, finish])
 
                 vertices = get_vertices_by_pairs(vertices_pairs)
@@ -199,18 +206,18 @@ class Detail:
 
 
 class Corner(Detail):
-    def __init__(self, vertices, edges, offset, name):
-        super().__init__(vertices, edges, offset, name)
+    def __init__(self, vertices, edges, offset, name, model_name):
+        super().__init__(vertices, edges, offset, name, model_name)
 
 
 class Rib(Detail):
-    def __init__(self, vertices, edges, offset, name):
-        super().__init__(vertices, edges, offset, name)
+    def __init__(self, vertices, edges, offset, name, model_name):
+        super().__init__(vertices, edges, offset, name, model_name)
 
 
 class Center(Detail):
-    def __init__(self, vertices, edges, offset, name):
-        super().__init__(vertices, edges, offset, name)
+    def __init__(self, vertices, edges, offset, name, model_name):
+        super().__init__(vertices, edges, offset, name, model_name, False)
         self.color = self.colors[name]
 
     def fill_shadow_detail(self, painter, vertices=None, color_side=None, shadow=None):
@@ -269,6 +276,8 @@ class Corners:
     def __init__(self, n, model_name):
         if model_name == config.CUBE:
             self.cfg = config.CubeConfig(n)
+        elif model_name == config.PYRAMID:
+            self.cfg = config.PyramidConfig(n)
         else:
             raise ValueError('Invalid model name param')
 
@@ -280,7 +289,7 @@ class Corners:
 
         self.corners = {}
         for key, value in positions.items():
-            self.corners[key] = Corner(deepcopy(vertices), edges, Point(*value), key)
+            self.corners[key] = Corner(deepcopy(vertices), edges, Point(*value), key, model_name)
 
     def init_extra_points(self):
         self.carcass = self.cfg.get_carcass()
@@ -413,6 +422,8 @@ class Ribs:
     def __init__(self, n, model_name):
         if model_name == config.CUBE:
             self.cfg = config.CubeConfig(n)
+        elif model_name == config.PYRAMID:
+            self.cfg = config.PyramidConfig(n)
         else:
             raise ValueError('Invalid model name param')
 
@@ -423,7 +434,7 @@ class Ribs:
             for key, value in positions.items():
                 self.ribs[key] = []
                 for position in positions[key]:
-                    self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key))
+                    self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key, model_name))
 
     def draw(self, painter, visible_sides, shadows=None):
         for key in self.ribs:
@@ -534,7 +545,7 @@ class Centers:
                 vertices, edges = self.cfg.get_center_data(key)
                 self.centers[key] = []
                 for position in positions[key]:
-                    self.centers[key].append(Center(deepcopy(vertices), edges, Point(*position), key))
+                    self.centers[key].append(Center(deepcopy(vertices), edges, Point(*position), key, model_name))
 
     def init_sides_centers(self):
         self.sides_centers = self.cfg.get_sides_centers()
