@@ -400,7 +400,7 @@ class PyramidConfig:
         self.size = Config().size / self.n
 
     def get_eccentric_data(self):
-        a = self.size * 2
+        a = self.size * 3
         h_pyr = a * sqrt(2 / 3)
         r_inner = a / (2 * sqrt(3))
 
@@ -427,7 +427,7 @@ class PyramidConfig:
 
     def get_offset_corners(self):
         offset = Config().size * (self.n - 1) / self.n
-        a = offset * 2
+        a = offset * 3
         h_pyr = a * sqrt(2 / 3)
         r_inner = a / (2 * sqrt(3))
 
@@ -467,7 +467,7 @@ class PyramidConfig:
         positions = {edge: [] for edge in edges}
 
         offset = Config().size * (self.n - 1) / self.n
-        a = offset * 2
+        a = offset * 3
         h_pyr = a * sqrt(2 / 3)
         r_inner = a / (2 * sqrt(3))
 
