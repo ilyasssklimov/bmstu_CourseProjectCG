@@ -27,7 +27,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.model = None
         self.k = 10
-        self.angle = 1  # 15
+        self.angle = 15
         self.speed = 2
         self.models.setCurrentText('Пирамидка')
         self.sizeModel.setCurrentText('3x3x3')

@@ -458,7 +458,7 @@ class PyramidConfig:
         edges = ['LF', 'RF', 'LR', 'FD', 'RD', 'LD']
         positions = {edge: [] for edge in edges}
 
-        n = (self.n - 2)
+        n = self.n - 2
         corners = self.get_offset_corners()
 
         pairs_corners = {
@@ -475,84 +475,64 @@ class PyramidConfig:
 
         return positions
 
-    def get_center_colors(self):
-        colors = {
-            'F': (255, 255, 255),
-            'R': (255, 0, 0),
-            'L': (255, 165, 0),
-            'D': (0, 128, 0),
-            'black': (0, 0, 0)
-        }
-
-        return colors
-
-    def get_carcass(self):
-        size = Config().size
-        vertices = {
-            'LRF': (0, -3 * size * sqrt(2) / 2, 0),
-            'LFD': (-3 * size, 3 * size * sqrt(2) / 2, size / sqrt(3)),
-            'RFD': (3 * size, 3 * size * sqrt(2) / 2, size / sqrt(3)),
-            'LRD': (0, 3 * size * sqrt(2) / 2, -size / sqrt(3))
-        }
-        vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
-
-        return vertices
-
-    '''
     def get_center_data(self, name):
+        a = self.size * 3
+        h_pyr = a * sqrt(2 / 3)
+        r_inner = a / (2 * sqrt(3))
+
         match name:
             case 'F':
                 vertices = {
-                    'LFD': (-self.size, self.size, self.size),
-                    'LFU': (-self.size, -self.size, self.size),
-                    'RFU': (self.size, -self.size, self.size),
-                    'RFD': (self.size, self.size, self.size)
+                    'LRF': (0, h_pyr / 2, 0),
+                    'LFD': (-a / 2, -h_pyr / 2, r_inner),
+                    'RFD': (a / 2, -h_pyr / 2, r_inner)
                 }
+
                 edges = [
-                    ('LFD', 'LFU'),
-                    ('LFU', 'RFU'),
-                    ('RFU', 'RFD'),
-                    ('RFD', 'LFD')
+                    ('LRF', 'LFD'),
+                    ('LRF', 'RFD'),
+                    ('LFD', 'RFD')
                 ]
+
             case 'L':
                 vertices = {
-                    'LFD': (-self.size, self.size, self.size),
-                    'LFU': (-self.size, -self.size, self.size),
-                    'LBU': (-self.size, -self.size, -self.size),
-                    'LBD': (-self.size, self.size, -self.size)
+                    'LRF': (0, h_pyr / 2, 0),
+                    'LFD': (-a / 2, -h_pyr / 2, r_inner),
+                    'LRD': (0, -h_pyr / 2, -r_inner * 2)
                 }
+
                 edges = [
-                    ('LFD', 'LFU'),
-                    ('LFU', 'LBU'),
-                    ('LBU', 'LBD'),
-                    ('LBD', 'LFD')
+                    ('LRF', 'LFD'),
+                    ('LRF', 'LRD'),
+                    ('LFD', 'LRD'),
                 ]
+
             case 'R':
                 vertices = {
-                    'RFD': (self.size, self.size, self.size),
-                    'RFU': (self.size, -self.size, self.size),
-                    'RBU': (self.size, -self.size, -self.size),
-                    'RBD': (self.size, self.size, -self.size)
+                    'LRF': (0, h_pyr / 2, 0),
+                    'RFD': (a / 2, -h_pyr / 2, r_inner),
+                    'LRD': (0, -h_pyr / 2, -r_inner * 2)
                 }
+
                 edges = [
-                    ('RFD', 'RFU'),
-                    ('RFU', 'RBU'),
-                    ('RBU', 'RBD'),
-                    ('RBD', 'RFD')
+                    ('LRF', 'RFD'),
+                    ('LRF', 'LRD'),
+                    ('RFD', 'LRD')
                 ]
+
             case 'D':
                 vertices = {
-                    'LBD': (-self.size, self.size, -self.size),
-                    'LFD': (-self.size, self.size, self.size),
-                    'RFD': (self.size, self.size, self.size),
-                    'RBD': (self.size, self.size, -self.size)
+                    'LFD': (-a / 2, -h_pyr / 2, r_inner),
+                    'RFD': (a / 2, -h_pyr / 2, r_inner),
+                    'LRD': (0, -h_pyr / 2, -r_inner * 2)
                 }
+
                 edges = [
-                    ('LBD', 'LFD'),
                     ('LFD', 'RFD'),
-                    ('RFD', 'RBD'),
-                    ('RBD', 'LBD')
+                    ('RFD', 'LRD'),
+                    ('LFD', 'LRD'),
                 ]
+
             case _:
                 raise SideNameError
 
@@ -560,18 +540,40 @@ class PyramidConfig:
         edges = [Edge(*edge) for edge in edges]
 
         return vertices, edges
-    '''
-    '''
-
-
-
-
 
     def get_offset_centers(self):
+        '''
+        def append_rib(position, pair):
+            position.append((
+                pair[1][0] + (pair[0][0] - pair[1][0]) * i / (n + 1),
+                pair[1][1] + (pair[0][1] - pair[1][1]) * i / (n + 1),
+                pair[1][2] + (pair[0][2] - pair[1][2]) * i / (n + 1)
+            ))
+
+        edges = ['LF', 'RF', 'LR', 'FD', 'RD', 'LD']
+        positions = {edge: [] for edge in edges}
+
+        n = (self.n - 2)
+        corners = self.get_offset_corners()
+
+        pairs_corners = {
+            'LF': (corners['LFD'], corners['LRF']),
+            'RF': (corners['RFD'], corners['LRF']),
+            'LR': (corners['LRD'], corners['LRF']),
+            'FD': (corners['RFD'], corners['LFD']),
+            'RD': (corners['RFD'], corners['LRD']),
+            'LD': (corners['LFD'], corners['LRD'])
+        }
+        for i in range(1, n + 1):
+            for edge in edges:
+                append_rib(positions[edge], pairs_corners[edge])
+
+        '''
         n = self.n - 2
 
-        sides = ['R', 'L', 'U', 'D', 'F', 'B']
+        sides = ['F', 'L', 'R', 'D']
         positions = {side: [] for side in sides}
+        corners = self.get_carcass()
 
         offset = Config().size * (self.n - 1) / self.n
         step = self.size
@@ -591,6 +593,35 @@ class PyramidConfig:
 
         return positions
 
+    def get_center_colors(self):
+        colors = {
+            'F': (255, 255, 255),
+            'R': (255, 0, 0),
+            'L': (255, 165, 0),
+            'D': (0, 128, 0),
+            'black': (0, 0, 0)
+        }
+
+        return colors
+
+    def get_carcass(self):
+        a = Config().size * 3
+        h_pyr = a * sqrt(2 / 3)
+        r_inner = a / (2 * sqrt(3))
+
+        vertices = {
+            'LRF': (0, -h_pyr / 2, 0),
+            'LFD': (-a / 2, h_pyr / 2, r_inner),
+            'RFD': (a / 2, h_pyr / 2, r_inner),
+            'LRD': (0, h_pyr / 2, -r_inner * 2)
+        }
+
+        vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
+
+        return vertices
+
+
+    '''
     def get_sides_centers(self):
         offset = Config().size
         sides_centers = {
