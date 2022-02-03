@@ -389,12 +389,6 @@ class CubeConfig:
 
 
 class PyramidConfig:
-    """
-    Длина стороны детали - size * 2
-    Высота стороны - size * sqrt(3)
-    Высота пирамиды - size / sqrt(6)
-    Радиус вписанной окружности - size / sqrt(3)
-    """
     def __init__(self, n=3):
         self.n = n
         self.size = Config().size / self.n
@@ -432,10 +426,10 @@ class PyramidConfig:
         r_inner = a / (2 * sqrt(3))
 
         positions = {
-            'LRF': (0, -h_pyr / 2, 0),
-            'LFD': (-a / 2, h_pyr / 2, r_inner),
-            'RFD': (a / 2, h_pyr / 2, r_inner),
-            'LRD': (0, h_pyr / 2, -r_inner * 2)
+            'LRF': (0, -h_pyr * 2 / 3, 0),
+            'LFD': (-a / 2, h_pyr / 3, r_inner),
+            'RFD': (a / 2, h_pyr / 3, r_inner),
+            'LRD': (0, h_pyr / 3, -r_inner * 2)
         }
 
         return positions
@@ -454,53 +448,30 @@ class PyramidConfig:
         if self.n < 3:
             return None
 
-        def add(position, value, axis):
-            position.append(value)
-            if axis == 'x':
-                position.append((-value[0], value[1], value[2]))
-            elif axis == 'y':
-                position.append((value[0], -value[1], value[2]))
-            elif axis == 'z':
-                position.append((value[0], value[1], -value[2]))
+        def append_rib(position, pair):
+            position.append((
+                pair[1][0] + (pair[0][0] - pair[1][0]) * i / (n + 1),
+                pair[1][1] + (pair[0][1] - pair[1][1]) * i / (n + 1),
+                pair[1][2] + (pair[0][2] - pair[1][2]) * i / (n + 1)
+            ))
 
         edges = ['LF', 'RF', 'LR', 'FD', 'RD', 'LD']
         positions = {edge: [] for edge in edges}
 
-        offset = Config().size * (self.n - 1) / self.n
-        a = offset * 3
-        h_pyr = a * sqrt(2 / 3)
-        r_inner = a / (2 * sqrt(3))
+        n = (self.n - 2)
+        corners = self.get_offset_corners()
 
-        if self.n % 2:
-            positions['LF'].append((-a / 4, 0, r_inner / 2))
-            positions['RF'].append((a / 4, 0, r_inner / 2))
-            positions['LR'].append((0, 0, -r_inner))
-
-            positions['FD'].append((0, h_pyr / 2, r_inner))
-            positions['RD'].append((a / 4, h_pyr / 2, -r_inner / 2))
-            positions['LD'].append((-a / 4, h_pyr / 2, - r_inner / 2))
-
-        n = (self.n - 2) // 2
-        step = self.size
-        t = 1 if not self.n % 2 else 2
-
-        for i in range(n):
-            addition = (i * 2 + t) * step
-
-            add(positions['RF'], (offset, addition, offset), 'y')
-            add(positions['UF'], (addition, -offset, offset), 'x')
-            add(positions['LF'], (-offset, addition, offset), 'y')
-            add(positions['DF'], (addition, offset, offset), 'x')
-
-            add(positions['RU'], (offset, -offset, addition), 'z')
-            add(positions['RD'], (offset, offset, addition), 'z')
-            add(positions['LD'], (-offset, offset, addition), 'z')
-            add(positions['LU'], (-offset, -offset, addition), 'z')
-
-            add(positions['RB'], (offset, addition, -offset), 'y')
-            add(positions['UB'], (addition, -offset, -offset), 'x')
-            add(positions['LB'], (-offset, addition, -offset), 'y')
-            add(positions['DB'], (addition, offset, -offset), 'x')
+        pairs_corners = {
+            'LF': (corners['LFD'], corners['LRF']),
+            'RF': (corners['RFD'], corners['LRF']),
+            'LR': (corners['LRD'], corners['LRF']),
+            'FD': (corners['RFD'], corners['LFD']),
+            'RD': (corners['RFD'], corners['LRD']),
+            'LD': (corners['LFD'], corners['LRD'])
+        }
+        for i in range(1, n + 1):
+            for edge in edges:
+                append_rib(positions[edge], pairs_corners[edge])
 
         return positions
 

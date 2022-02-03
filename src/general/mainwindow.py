@@ -29,6 +29,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.k = 10
         self.angle = 1  # 15
         self.speed = 2
+        self.models.setCurrentText('Пирамидка')
         self.sizeModel.setCurrentText('3x3x3')
         self.load_model()
 
@@ -123,8 +124,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         size = int(self.sizeModel.currentText().split('x')[0])
         if model == CUBE:
             self.model = Cube(size)
-            self.model.turn_oy(45)
-            self.model.turn_ox(-30)
+            # self.model.turn_oy(45)
+            # self.model.turn_ox(-30)
             self.update()
         elif model == PYRAMID:
             self.model = Pyramid(size)
