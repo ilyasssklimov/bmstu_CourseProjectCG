@@ -256,6 +256,12 @@ class Pyramid:
         dx, dy, dz = cfg.dx, cfg.dy, cfg.dz
         self.center_point = Point(dx, dy, dz)
 
+        self.matrix_center = [dx, dy, dz, 1]
+        self.viewer = [dx, dy, dz + 100000, 0]
+        self.matrix_body = None
+
+        self.set_visible_sides()
+
     def draw(self, painter):
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
@@ -270,7 +276,7 @@ class Pyramid:
 
         self.corners.scale(tmp, self.center_point)
         self.ribs.scale(tmp, self.center_point)
-        # self.centers.scale(tmp, self.center_point)
+        self.centers.scale(tmp, self.center_point)
 
         self.k = k
 
@@ -288,6 +294,8 @@ class Pyramid:
 
         self.move(self.center_point)
 
+        self.set_visible_sides()
+
     def turn_oy(self, angle):
         self.move(-self.center_point)
 
@@ -297,6 +305,8 @@ class Pyramid:
 
         self.move(self.center_point)
 
+        self.set_visible_sides()
+
     def turn_oz(self, angle):
         self.move(-self.center_point)
 
@@ -305,3 +315,24 @@ class Pyramid:
         self.centers.turn_oz(angle)
 
         self.move(self.center_point)
+
+        self.set_visible_sides()
+
+    def set_matrix_body(self):
+        sides = self.corners.create_plane_points()
+        coefficients = {}
+
+        for key, value in sides.items():
+            plane = MatrixPlane(value)
+            coefficients[key] = plane.get_determinant()
+
+        self.matrix_body = MatrixBody(coefficients)
+        self.matrix_body.adjust(self.matrix_center)
+
+    def set_visible_sides(self):
+        self.set_matrix_body()
+        sides = self.matrix_body.sides
+
+        visible_res = self.matrix_body.multiplication_vector(self.viewer)
+        self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
+        print(self.visible_sides)

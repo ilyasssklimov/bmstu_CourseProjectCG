@@ -539,7 +539,7 @@ class Centers:
             raise ValueError('Invalid model name param')
 
         self.sides_centers = None
-        # self.init_sides_centers()
+        self.init_sides_centers()
         self.n = n
 
         self.centers = {}
@@ -579,29 +579,29 @@ class Centers:
         for key in self.centers:
             for center in self.centers[key]:
                 center.move(point)
-        # for key in self.sides_centers:
-        #     self.sides_centers[key].move(point)
+        for key in self.sides_centers:
+            self.sides_centers[key].move(point)
 
     def turn_ox(self, angle):
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_ox(angle)
-        # for key in self.sides_centers:
-        #     self.sides_centers[key].turn_ox(angle)
+        for key in self.sides_centers:
+            self.sides_centers[key].turn_ox(angle)
 
     def turn_oy(self, angle):
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oy(angle)
-        # for key in self.sides_centers:
-        #     self.sides_centers[key].turn_oy(angle)
+        for key in self.sides_centers:
+            self.sides_centers[key].turn_oy(angle)
 
     def turn_oz(self, angle):
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oz(angle)
-        # for key in self.sides_centers:
-        #     self.sides_centers[key].turn_oz(angle)
+        for key in self.sides_centers:
+            self.sides_centers[key].turn_oz(angle)
 
     def scale(self, k, point):
         for key in self.centers:

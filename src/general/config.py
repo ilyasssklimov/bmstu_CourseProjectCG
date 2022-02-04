@@ -479,14 +479,7 @@ class PyramidConfig:
         a = self.size * 3
         h_pyr = a * sqrt(2 / 3)
         r_inner = a / (2 * sqrt(3))
-        '''
-                vertices = {
-            'LRF': (0, -h_pyr * 2 / 3, 0),
-            'LFD': (-a / 2, h_pyr / 3, r_inner),
-            'RFD': (a / 2, h_pyr / 3, r_inner),
-            'LRD': (0, h_pyr / 3, -r_inner * 2)
-        }
-        '''
+
         match name:
             case 'F':
                 vertices = {
@@ -621,27 +614,25 @@ class PyramidConfig:
         r_inner = a / (2 * sqrt(3))
 
         vertices = {
-            'LRF': (0, -h_pyr / 2, 0),
-            'LFD': (-a / 2, h_pyr / 2, r_inner),
-            'RFD': (a / 2, h_pyr / 2, r_inner),
-            'LRD': (0, h_pyr / 2, -r_inner * 2)
+            'LRF': (0, -h_pyr * 2 / 3, 0),
+            'LFD': (-a / 2, h_pyr / 3, r_inner),
+            'RFD': (a / 2, h_pyr / 3, r_inner),
+            'LRD': (0, h_pyr / 3, -r_inner * 2)
         }
 
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
 
         return vertices
 
-
-    '''
     def get_sides_centers(self):
-        offset = Config().size
+        a = Config().size * 3
+        h_pyr = a * sqrt(2 / 3)
+        r_inner = a / (2 * sqrt(3))
         sides_centers = {
-            'R': (offset, 0, 0),
-            'L': (-offset, 0, 0),
-            'U': (0, -offset, 0),
-            'D': (0, offset, 0),
-            'F': (0, 0, offset),
-            'B': (0, 0, -offset)
+            'F': (0, 0, r_inner),
+            'L': (-a / 4, 0, -r_inner),
+            'R': (a / 4, 0, -r_inner),
+            'D': (0, h_pyr / 3, 0)
         }
         sides_centers = {side: Point(*center) for side, center in sides_centers.items()}
 
@@ -649,52 +640,46 @@ class PyramidConfig:
 
     def get_exchanges_corners(self):
         exchanges_corners = {
-            'R': ['RFU', 'RBU', 'RBD', 'RFD'],
-            'L': ['LFU', 'LFD', 'LBD', 'LBU'],
-            'U': ['ULF', 'ULB', 'URB', 'URF'],
-            'D': ['DLF', 'DRF', 'DRB', 'DLB'],
-            'F': ['FLU', 'FRU', 'FRD', 'FLD'],
-            'B': ['BLU', 'BLD', 'BRD', 'BRU']
+            'F': ['LRF', 'RFD', 'LFD'],
+            'L': ['LRF', 'LRD', 'LFD'],
+            'R': ['LRF', 'RFD', 'LRD'],
+            'D': ['LRD', 'LFD', 'RFD']
         }
 
         return exchanges_corners
 
     def get_exchanges_ribs(self):
         exchanges_ribs = {
-            'R': ['RU', 'RB', 'RD', 'RF'],
-            'L': ['LU', 'LF', 'LD', 'LB'],
-            'U': ['UF', 'UL', 'UB', 'UR'],
-            'D': ['DF', 'DR', 'DB', 'DL'],
-            'F': ['FU', 'FR', 'FD', 'FL'],
-            'B': ['BU', 'BL', 'BD', 'BR']
+            'F': ['LF', 'RF', 'FD'],
+            'L': ['LR', 'LF', 'LD'],
+            'R': ['RF', 'LR', 'FD'],
+            'D': ['FD', 'LD', 'RD']
         }
 
         return exchanges_ribs
 
+    def get_sides(self):
+        sides = {
+            'F': ('LFD', 'RFD', 'LRF'),
+            'L': ('LRD', 'LFD', 'LRF'),
+            'R': ('LRD', 'RFD', 'LRF'),
+            'D': ('LFD', 'RFD', 'LRD')
+        }
+
+        return sides
+
+    '''
+
     def get_exchanges_centers(self):
         exchanges_centers = {
-            'R': ['U', 'B', 'D', 'F'],
-            'L': ['U', 'F', 'D', 'B'],
-            'U': ['F', 'L', 'B', 'R'],
-            'D': ['F', 'R', 'B', 'L'],
             'F': ['U', 'R', 'D', 'L'],
-            'B': ['U', 'L', 'D', 'R']
+            'L': ['U', 'F', 'D', 'B'],
+            'R': ['U', 'B', 'D', 'F'],
+            'D': ['F', 'R', 'B', 'L']
         }
 
         return exchanges_centers
 
-    def get_sides(self):
-        # you can choose another
-        sides = {
-            'U': ('LFU', 'RBU', 'RFU'),
-            'D': ('LFD', 'RBD', 'RFD'),
-            'R': ('RFD', 'RBU', 'RBD'),
-            'L': ('LFD', 'LBU', 'LBD'),
-            'F': ('LFD', 'RFU', 'LFU'),
-            'B': ('LBD', 'RBU', 'LBU')
-        }
-
-        return sides
 
     def get_opposite(self, side):
         sides = {
