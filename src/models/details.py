@@ -226,8 +226,10 @@ class Center(Detail):
         painter.fill(self.vertices.values())
 
     def fill_detail(self, painter, vertices=None, color_side=None):
-        painter.setBrush(QBrush(QColor(*self.color), Qt.SolidPattern))
-        painter.fill(self.vertices.values())
+        for i in range(len(self.vertices)):
+            painter.pcreate_line(list(self.vertices.values())[i], list(self.vertices.values())[(i + 1) % 3])
+        # painter.setBrush(QBrush(QColor(*self.color), Qt.SolidPattern))
+        # painter.fill(self.vertices.values())
 
     def draw(self, painter, visible_sides, shadows=None):
         if not shadows:
@@ -531,18 +533,21 @@ class Centers:
     def __init__(self, n, model_name):
         if model_name == config.CUBE:
             self.cfg = config.CubeConfig(n)
+        elif model_name == config.PYRAMID:
+            self.cfg = config.PyramidConfig(n)
         else:
             raise ValueError('Invalid model name param')
 
         self.sides_centers = None
-        self.init_sides_centers()
+        # self.init_sides_centers()
         self.n = n
 
         self.centers = {}
-        if n > 2:
+        if n > 2 or model_name == config.PYRAMID:
             positions = self.cfg.get_offset_centers()
             for key, value in positions.items():
                 vertices, edges = self.cfg.get_center_data(key)
+
                 self.centers[key] = []
                 for position in positions[key]:
                     self.centers[key].append(Center(deepcopy(vertices), edges, Point(*position), key, model_name))
@@ -574,29 +579,29 @@ class Centers:
         for key in self.centers:
             for center in self.centers[key]:
                 center.move(point)
-        for key in self.sides_centers:
-            self.sides_centers[key].move(point)
+        # for key in self.sides_centers:
+        #     self.sides_centers[key].move(point)
 
     def turn_ox(self, angle):
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_ox(angle)
-        for key in self.sides_centers:
-            self.sides_centers[key].turn_ox(angle)
+        # for key in self.sides_centers:
+        #     self.sides_centers[key].turn_ox(angle)
 
     def turn_oy(self, angle):
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oy(angle)
-        for key in self.sides_centers:
-            self.sides_centers[key].turn_oy(angle)
+        # for key in self.sides_centers:
+        #     self.sides_centers[key].turn_oy(angle)
 
     def turn_oz(self, angle):
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oz(angle)
-        for key in self.sides_centers:
-            self.sides_centers[key].turn_oz(angle)
+        # for key in self.sides_centers:
+        #     self.sides_centers[key].turn_oz(angle)
 
     def scale(self, k, point):
         for key in self.centers:

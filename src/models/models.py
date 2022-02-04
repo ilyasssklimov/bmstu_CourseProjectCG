@@ -249,8 +249,9 @@ class Pyramid:
         self.n = n
         self.corners = Corners(n, PYRAMID)
         self.ribs = Ribs(n, PYRAMID)
+        self.centers = Centers(n, PYRAMID)
         self.visible_sides = ['L', 'R', 'F', 'D']
-
+        self.k = 1
         cfg = Config()
         dx, dy, dz = cfg.dx, cfg.dy, cfg.dz
         self.center_point = Point(dx, dy, dz)
@@ -261,16 +262,29 @@ class Pyramid:
 
         self.corners.draw(painter, self.visible_sides)
         self.ribs.draw(painter, self.visible_sides)
+        self.centers.draw(painter, self.visible_sides)
+
+    def scale(self, k):
+        k = k if k else 1
+        tmp = k / self.k
+
+        self.corners.scale(tmp, self.center_point)
+        self.ribs.scale(tmp, self.center_point)
+        # self.centers.scale(tmp, self.center_point)
+
+        self.k = k
 
     def move(self, point):
         self.corners.move(point)
         self.ribs.move(point)
+        self.centers.move(point)
 
     def turn_ox(self, angle):
         self.move(-self.center_point)
 
         self.corners.turn_ox(angle)
         self.ribs.turn_ox(angle)
+        self.centers.turn_ox(angle)
 
         self.move(self.center_point)
 
@@ -279,6 +293,7 @@ class Pyramid:
 
         self.corners.turn_oy(angle)
         self.ribs.turn_oy(angle)
+        self.centers.turn_oy(angle)
 
         self.move(self.center_point)
 
@@ -287,5 +302,6 @@ class Pyramid:
 
         self.corners.turn_oz(angle)
         self.ribs.turn_oz(angle)
+        self.centers.turn_oz(angle)
 
         self.move(self.center_point)

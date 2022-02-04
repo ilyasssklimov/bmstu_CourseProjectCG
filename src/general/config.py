@@ -399,10 +399,10 @@ class PyramidConfig:
         r_inner = a / (2 * sqrt(3))
 
         vertices = {
-            'LRF': (0, -h_pyr / 2, 0),
-            'LFD': (-a / 2, h_pyr / 2, r_inner),
-            'RFD': (a / 2, h_pyr / 2, r_inner),
-            'LRD': (0, h_pyr / 2, -r_inner * 2)
+            'LRF': (0, -h_pyr * 2 / 3, 0),
+            'LFD': (-a / 2, h_pyr / 3, r_inner),
+            'RFD': (a / 2, h_pyr / 3, r_inner),
+            'LRD': (0, h_pyr / 3, -r_inner * 2)
         }
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
 
@@ -479,13 +479,20 @@ class PyramidConfig:
         a = self.size * 3
         h_pyr = a * sqrt(2 / 3)
         r_inner = a / (2 * sqrt(3))
-
+        '''
+                vertices = {
+            'LRF': (0, -h_pyr * 2 / 3, 0),
+            'LFD': (-a / 2, h_pyr / 3, r_inner),
+            'RFD': (a / 2, h_pyr / 3, r_inner),
+            'LRD': (0, h_pyr / 3, -r_inner * 2)
+        }
+        '''
         match name:
             case 'F':
                 vertices = {
-                    'LRF': (0, h_pyr / 2, 0),
-                    'LFD': (-a / 2, -h_pyr / 2, r_inner),
-                    'RFD': (a / 2, -h_pyr / 2, r_inner)
+                    'LRF': (0, h_pyr / 3, r_inner),
+                    'LFD': (-a / 2, -h_pyr * 2 / 3, 0),
+                    'RFD': (a / 2, -h_pyr * 2 / 3, 0)
                 }
 
                 edges = [
@@ -496,9 +503,9 @@ class PyramidConfig:
 
             case 'L':
                 vertices = {
-                    'LRF': (0, h_pyr / 2, 0),
-                    'LFD': (-a / 2, -h_pyr / 2, r_inner),
-                    'LRD': (0, -h_pyr / 2, -r_inner * 2)
+                    'LRF': (-a / 4, h_pyr / 3, 0),
+                    'LFD': (-a / 4, -h_pyr * 2 / 3, r_inner * 2),
+                    'LRD': (a / 4, -h_pyr * 2 / 3, -r_inner)
                 }
 
                 edges = [
@@ -509,11 +516,10 @@ class PyramidConfig:
 
             case 'R':
                 vertices = {
-                    'LRF': (0, h_pyr / 2, 0),
-                    'RFD': (a / 2, -h_pyr / 2, r_inner),
-                    'LRD': (0, -h_pyr / 2, -r_inner * 2)
+                    'LRF': (a / 4, h_pyr / 3, 0),
+                    'RFD': (a / 4, -h_pyr * 2 / 3, r_inner * 2),
+                    'LRD': (-a / 4, -h_pyr * 2 / 3, -r_inner)
                 }
-
                 edges = [
                     ('LRF', 'RFD'),
                     ('LRF', 'LRD'),
@@ -522,11 +528,10 @@ class PyramidConfig:
 
             case 'D':
                 vertices = {
-                    'LFD': (-a / 2, -h_pyr / 2, r_inner),
-                    'RFD': (a / 2, -h_pyr / 2, r_inner),
-                    'LRD': (0, -h_pyr / 2, -r_inner * 2)
+                    'LFD': (-a / 2, h_pyr / 3, -r_inner * 2),
+                    'RFD': (a / 2, h_pyr / 3, -r_inner * 2),
+                    'LRD': (0, h_pyr / 3, r_inner)
                 }
-
                 edges = [
                     ('LFD', 'RFD'),
                     ('RFD', 'LRD'),
@@ -542,54 +547,60 @@ class PyramidConfig:
         return vertices, edges
 
     def get_offset_centers(self):
-        '''
-        def append_rib(position, pair):
-            position.append((
-                pair[1][0] + (pair[0][0] - pair[1][0]) * i / (n + 1),
-                pair[1][1] + (pair[0][1] - pair[1][1]) * i / (n + 1),
-                pair[1][2] + (pair[0][2] - pair[1][2]) * i / (n + 1)
-            ))
+        def append_centers(position, triplet, k):
+            def append_center(direction):
+                if side == 'F':
+                    position.append((
+                        triplet[0][0] + (triplet[1][0] - triplet[0][0]) * (n + (start + j * 2) * direction) / (n * 2),
+                        triplet[2][1] + (triplet[1][1] - triplet[2][1]) * (i + 1) / n,
+                        triplet[2][2] + (triplet[1][2] - triplet[2][2]) * (i + 1) / n
+                    ))
+                elif side == 'L':
+                    position.append((
+                        triplet[2][0] - (triplet[2][0] - triplet[1][0]) * (j + k[0] * 2 + 1) / (n * 2),
+                        triplet[2][1] + (triplet[1][1] - triplet[2][1]) * (i + 1) / n,
+                        triplet[0][2] + (triplet[1][2] - triplet[0][2]) * (n * (1 - i / 6) +
+                                                                           (start + j * 2) * direction) / (n * 2)
+                    ))
+                elif side == 'R':
+                    position.append((
+                        triplet[2][0] - (triplet[2][0] - triplet[1][0]) * (j + k[0] * 2 + 1) / (n * 2),
+                        triplet[2][1] + (triplet[1][1] - triplet[2][1]) * (i + 1) / n,
+                        triplet[0][2] + (triplet[1][2] - triplet[0][2]) * (n * (1 - i / 6) +
+                                                                           (start + j * 2) * direction) / (n * 2)
+                    ))
+                elif side == 'D':
+                    position.append((
+                        triplet[0][0] + (triplet[1][0] - triplet[0][0]) * (n + (start + j * 2) * direction) / (n * 2),
+                        triplet[0][1],
+                        triplet[2][2] + (triplet[1][2] - triplet[2][2]) * (i + 1) / n
+                    ))
 
-        edges = ['LF', 'RF', 'LR', 'FD', 'RD', 'LD']
-        positions = {edge: [] for edge in edges}
+            for j in range(i // 2 + 1):
+                append_center(-1)
+                if start == 1:
+                    k[0] += 1
+                append_center(1)
+                k[0] += 1
 
-        n = (self.n - 2)
-        corners = self.get_offset_corners()
-
-        pairs_corners = {
-            'LF': (corners['LFD'], corners['LRF']),
-            'RF': (corners['RFD'], corners['LRF']),
-            'LR': (corners['LRD'], corners['LRF']),
-            'FD': (corners['RFD'], corners['LFD']),
-            'RD': (corners['RFD'], corners['LRD']),
-            'LD': (corners['LFD'], corners['LRD'])
-        }
-        for i in range(1, n + 1):
-            for edge in edges:
-                append_rib(positions[edge], pairs_corners[edge])
-
-        '''
-        n = self.n - 2
+        n = self.n - 1
 
         sides = ['F', 'L', 'R', 'D']
         positions = {side: [] for side in sides}
-        corners = self.get_carcass()
+        corners = self.get_offset_corners()
 
-        offset = Config().size * (self.n - 1) / self.n
-        step = self.size
-        t = 1 if not self.n % 2 else 0
+        triplet_corners = {
+            'F': (corners['LFD'], corners['RFD'], corners['LRF']),
+            'L': (corners['LRD'], corners['LFD'], corners['LRF']),
+            'R': (corners['LRD'], corners['RFD'], corners['LRF']),
+            'D': (corners['LFD'], corners['RFD'], corners['LRD'])
+        }
 
-        for i in range(-(n // 2), (n + 1) // 2):
-            dy = (i * 2 + t) * step
-            for j in range(-(n // 2), (n + 1) // 2):
-                dx = (j * 2 + t) * step
-
-                positions['F'].append((dx, dy, offset))
-                positions['B'].append((dx, dy, -offset))
-                positions['R'].append((offset, dy, dx))
-                positions['L'].append((-offset, dy, dx))
-                positions['U'].append((dx, -offset, dy))
-                positions['D'].append((dx, offset, dy))
+        for i in range(n):
+            start = 1 if i % 2 else 0
+            for side in sides:
+                cnt = [0]
+                append_centers(positions[side], triplet_corners[side], cnt)
 
         return positions
 
