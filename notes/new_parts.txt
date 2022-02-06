@@ -1,0 +1,39 @@
+1) Диаграммы классов:
+- MainWindow
+- QtDrawer
+
+- Config
+- CubeConfig
+- PyramidConfig
+- MegaminxConfig
+
+- Model
+- Cube
+- Pyramid
+- Megaminx
+
+- Detail
+- Corner
+- Rib
+- Center
+- Corners
+- Ribs
+- Centers
+
+- Edge
+- Point
+- MatrixTransform
+- MatrixPlane
+- MatrixBody
+- Vector
+- Angle
+
+2) Схемы алгоритмов:
+- алгоритм удаления нелицевых граней
+- алгоритм поворота граней
+- алгоритм художника
+- алгоритм освещения
+
+3) Сравнение по времени работы:
+- кубик на разных длинах
+- все три головомки с размерностью 3
