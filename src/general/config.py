@@ -663,7 +663,7 @@ class PyramidConfig:
             'F': ['LF', 'RF', 'FD'],
             'L': ['LR', 'LF', 'LD'],
             'R': ['RF', 'LR', 'RD'],
-            'D': ['FD', 'LD', 'RD']
+            'D': ['FD', 'RD', 'LD']
         }
 
         return exchanges_ribs
