@@ -1,10 +1,12 @@
+from math import sqrt
+
 from src.general.config import Config, CubeConfig, PyramidConfig, EPS, CUBE, PYRAMID, MEGAMINX
 from src.models.details import Corners, Ribs, Centers
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QBrush, QColor
 from src.utils.point import Point
 from src.utils.matrix import MatrixPlane, MatrixBody
-from src.utils.mymath import Vector, Angle, get_plane_cosine
+from src.utils.mymath import Vector, Angle, get_plane_cosine, sin_deg, cos_deg
 
 
 class Model:
@@ -218,6 +220,7 @@ class Model:
 
         visible_res = self.matrix_body.multiplication_vector(self.viewer)
         self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
+        # self.visible_sides = ['R']  # , 'L', 'R', 'D']
 
     def add_light(self, point):
         self.light_sources.append(point)
@@ -235,104 +238,36 @@ class Cube(Model):
         super().__init__(corners, ribs, centers, n)
 
 
-class Pyramid:
-    """
+class Pyramid(Model):
     def __init__(self, n):
+        corners = Corners(n, PYRAMID)
+        ribs = Ribs(n, PYRAMID)
         centers = Centers(n, PYRAMID)
-        ribs = Centers(n, CUBE)
-        corners = Centers(n, CUBE)
 
-        # super().__init__(corners, ribs, centers, n)
-    """
+        super().__init__(corners, ribs, centers, n)
 
-    def __init__(self, n):
-        self.n = n
-        self.corners = Corners(n, PYRAMID)
-        self.ribs = Ribs(n, PYRAMID)
-        self.centers = Centers(n, PYRAMID)
-        self.visible_sides = ['L', 'R', 'F', 'D']
-        self.k = 1
-        cfg = Config()
-        dx, dy, dz = cfg.dx, cfg.dy, cfg.dz
-        self.center_point = Point(dx, dy, dz)
-
-        self.matrix_center = [dx, dy, dz, 1]
-        self.viewer = [dx, dy, dz + 100000, 0]
-        self.matrix_body = None
-
-        self.set_visible_sides()
-
-    def draw(self, painter):
-        pen = QPen(Qt.black, 6)
-        painter.setPen(pen)
-
-        self.corners.draw(painter, self.visible_sides)
-        self.ribs.draw(painter, self.visible_sides)
-        self.centers.draw(painter, self.visible_sides)
-
-    def scale(self, k):
-        k = k if k else 1
-        tmp = k / self.k
-
-        self.corners.scale(tmp, self.center_point)
-        self.ribs.scale(tmp, self.center_point)
-        self.centers.scale(tmp, self.center_point)
-
-        self.k = k
-
-    def move(self, point):
-        self.corners.move(point)
-        self.ribs.move(point)
-        self.centers.move(point)
-
-    def turn_ox(self, angle):
+    def turn_side(self, name, angle):
         self.move(-self.center_point)
 
-        self.corners.turn_ox(angle)
-        self.ribs.turn_ox(angle)
-        self.centers.turn_ox(angle)
+        offset = Point(self.corners.carcass[PyramidConfig().get_opposite_corners()[name]])
+        self.move(-offset)
 
+        direction_vector = Vector(self.centers.sides_centers[name])
+        direction_vector.normalize()
+        d = direction_vector.get_length_xy()
+
+        alpha = Angle()  # to yz plane
+        beta = Angle()  # to y
+        try:
+            alpha.set_cos(direction_vector.y / d)
+            alpha.set_sin(direction_vector.x / d)
+        except ZeroDivisionError:
+            alpha.set_cos(1)
+            alpha.set_sin(0)
+        beta.set_cos(d)
+        beta.set_sin(-direction_vector.z)
+
+        self.turn_side_elements(name, angle, alpha, beta)
+
+        self.move(offset)
         self.move(self.center_point)
-
-        self.set_visible_sides()
-
-    def turn_oy(self, angle):
-        self.move(-self.center_point)
-
-        self.corners.turn_oy(angle)
-        self.ribs.turn_oy(angle)
-        self.centers.turn_oy(angle)
-
-        self.move(self.center_point)
-
-        self.set_visible_sides()
-
-    def turn_oz(self, angle):
-        self.move(-self.center_point)
-
-        self.corners.turn_oz(angle)
-        self.ribs.turn_oz(angle)
-        self.centers.turn_oz(angle)
-
-        self.move(self.center_point)
-
-        self.set_visible_sides()
-
-    def set_matrix_body(self):
-        sides = self.corners.create_plane_points()
-        coefficients = {}
-
-        for key, value in sides.items():
-            plane = MatrixPlane(value)
-            coefficients[key] = plane.get_determinant()
-
-        self.matrix_body = MatrixBody(coefficients)
-        self.matrix_body.adjust(self.matrix_center)
-
-    def set_visible_sides(self):
-        self.set_matrix_body()
-        sides = self.matrix_body.sides
-
-        visible_res = self.matrix_body.multiplication_vector(self.viewer)
-        self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
-        print(self.visible_sides)

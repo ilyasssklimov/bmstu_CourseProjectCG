@@ -2,11 +2,11 @@ from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QColor, QRadialGradient, QBrush
 from PyQt5 import QtWidgets, QtCore
 
-from src.general.config import Config, get_colors, CUBE, PYRAMID, MEGAMINX
+from src.general.config import Config, get_colors, CUBE, PYRAMID, MEGAMINX, PyramidConfig
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
 from src.models.models import Cube, Pyramid
-from src.utils.mymath import sign
+from src.utils.mymath import sign, Vector, Angle
 from src.utils.point import Point
 
 
@@ -27,8 +27,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.model = None
         self.k = 10
-        self.angle = 15
+        self.angle = 90
         self.speed = 2
+        self.angle_to_turn = 120
+
         self.models.setCurrentText('Пирамидка')
         self.sizeModel.setCurrentText('3x3x3')
         self.load_model()
@@ -124,11 +126,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         size = int(self.sizeModel.currentText().split('x')[0])
         if model == CUBE:
             self.model = Cube(size)
+            self.angle_to_turn = 90
+
             # self.model.turn_oy(45)
             # self.model.turn_ox(-30)
+
             self.update()
         elif model == PYRAMID:
             self.model = Pyramid(size)
+
+            self.angle_to_turn = 120
+
+            # self.model.turn_oy(60)
+            # self.model.turn_ox(-30)
+
             self.update()
         elif model == MEGAMINX:
             print('megaminx')
@@ -148,6 +159,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model.draw(painter)
         else:
             self.model.draw_turning(painter, self.turning_side, self.plastic_vertices)
+
+        # for key in self.model.centers.centers:
+        #     for center in self.model.centers.centers[key]:
+        #          painter.pset_pixel(center.get_side_center('F'))
+
+        # painter.pcreate_line(self.model.corners.carcass['LRD'], self.model.centers.sides_centers['F'])
 
         painter.end()
 
@@ -216,16 +233,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.turning_direction = direction
 
     def start_turning_side(self, name, direction):
+        if isinstance(self.model, Pyramid) and (name == 'B' or name == 'U'):
+            return
+
         if self.duration == 0:
             self.plastic_vertices = self.model.get_static_plastic_part(name)
             self.set_turning_params(name, direction)
             self.timer.start(0)
 
     def turn_side(self):
-        self.duration += 1
-        self.model.turn_side(self.turning_side, self.turning_direction)
+        k = self.angle_to_turn
+        k = 1
+        self.duration += k
+        self.model.turn_side(self.turning_side, self.turning_direction * k)
 
-        if self.duration >= 90:
+        if self.duration >= self.angle_to_turn:
             self.update_sides()
             self.timer.stop()
             self.duration = 0

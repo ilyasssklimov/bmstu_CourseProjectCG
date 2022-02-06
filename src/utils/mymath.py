@@ -42,9 +42,10 @@ class Vector:
 
     def normalize(self):
         d = sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
-        self.x /= d
-        self.y /= d
-        self.z /= d
+        if d != 0:
+            self.x /= d
+            self.y /= d
+            self.z /= d
 
     def get_length_xy(self):
         return sqrt(self.x ** 2 + self.y ** 2)

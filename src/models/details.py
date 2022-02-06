@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QBrush
+from PyQt5.QtGui import QColor, QBrush, QPen
 import src.general.config as config
 from copy import deepcopy
 from src.utils.point import divide_line_by_num
@@ -7,10 +7,6 @@ from src.utils.matrix import MatrixPlane
 from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_plane_cosine
 from src.utils.mymath import Vector
 from src.utils.point import Point
-
-
-# TODO: наследовать детали от одного класса (возможно)
-# TODO: убрать дублирование кода, рефакторинг!
 
 
 class Detail:
@@ -34,6 +30,8 @@ class Detail:
 
         self.move(offset)
         self.move(config.Config().center)
+
+        self.offset = offset
 
     def __str__(self):
         result = 'Detail\n[\n'
@@ -92,6 +90,7 @@ class Detail:
         self.sides[exchange[saved_ind + direction]] = tmp
 
         set_name = set(self.name)
+        # print(f'{self.name = }, in update {self.prev_name = }, {self.name = }')
         set_prev_name = set(self.prev_name)
         old_letter = list(set_prev_name - set_name)
         new_letter = list(set_name - set_prev_name)
@@ -203,6 +202,15 @@ class Detail:
             return cosine
         else:
             return 1
+
+    def get_side_center(self, name):
+        center = Point()
+
+        for key in self.vertices:
+            if name in key:
+                center += self.vertices[key]
+
+        return center / 3
 
 
 class Corner(Detail):
@@ -543,7 +551,7 @@ class Centers:
         self.n = n
 
         self.centers = {}
-        if n > 2 or model_name == config.PYRAMID:
+        if n > 2:
             positions = self.cfg.get_offset_centers()
             for key, value in positions.items():
                 vertices, edges = self.cfg.get_center_data(key)
@@ -564,6 +572,13 @@ class Centers:
         for key in visible_sides:
             for center in self.centers[key]:
                 center.draw(painter, visible_sides, shadows)
+
+        # pen = QPen(Qt.red, 10)
+        # painter.setPen(pen)
+        # painter.pset_pixel(self.sides_centers['R'])
+
+        pen = QPen(Qt.black, 6)
+        painter.setPen(pen)
 
     def get_center(self, side):
         if self.n == 2:

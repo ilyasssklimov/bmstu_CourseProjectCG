@@ -3,9 +3,16 @@ from src.utils.mymath import sin_deg, cos_deg
 
 class Point:
     def __init__(self, x=0, y=0, z=0):
-        self.x = x
-        self.y = y
-        self.z = z
+        if isinstance(x, Point):
+            self.x = x.x
+            self.y = x.y
+            self.z = x.z
+        elif isinstance(x, int | float):
+            self.x = x
+            self.y = y
+            self.z = z
+        else:
+            raise ValueError('Invalid params to point constructor')
 
     def __str__(self):
         return f'Point({self.x}, {self.y}, {self.z})'
