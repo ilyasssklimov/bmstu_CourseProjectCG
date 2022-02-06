@@ -161,10 +161,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model.draw_turning(painter, self.turning_side, self.plastic_vertices)
 
         # for key in self.model.centers.centers:
-        #     for center in self.model.centers.centers[key]:
-        #          painter.pset_pixel(center.get_side_center('F'))
-
-        # painter.pcreate_line(self.model.corners.carcass['LRD'], self.model.centers.sides_centers['F'])
+        #     if key == 'R':
+        #         for center in self.model.centers.centers[key]:
+        #             painter.pcreate_line(self.model.centers.sides_centers['D'], center.get_center_by_name())
 
         painter.end()
 
@@ -239,6 +238,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.duration == 0:
             self.plastic_vertices = self.model.get_static_plastic_part(name)
             self.set_turning_params(name, direction)
+            if isinstance(self.model, Pyramid):
+                self.model.init_turning_centers(name)
             self.timer.start(0)
 
     def turn_side(self):
@@ -249,6 +250,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if self.duration >= self.angle_to_turn:
             self.update_sides()
+            if isinstance(self.model, Pyramid):
+                self.model.uninit_turning_centers()
             self.timer.stop()
             self.duration = 0
 

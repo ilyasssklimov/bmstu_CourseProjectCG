@@ -1,3 +1,5 @@
+from math import sqrt
+
 from src.utils.mymath import sin_deg, cos_deg
 
 
@@ -97,6 +99,9 @@ class Point:
         self.x = -self.x
         self.y = -self.y
         self.z = -self.z
+
+    def get_dist_to_point(self, point):
+        return sqrt((self.x - point.x) ** 2 + (self.y - point.y) ** 2 + (self.z - point.z) ** 2)
 
 
 def divide_line_by_num(point_1, point_2, alpha):

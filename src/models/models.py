@@ -10,11 +10,18 @@ from src.utils.mymath import Vector, Angle, get_plane_cosine, sin_deg, cos_deg
 
 
 class Model:
-    def __init__(self, corners, ribs, centers, n):
+    def __init__(self, corners, ribs, centers, n, model_name):
         self.n = n
         self.corners = corners
         self.ribs = ribs
         self.centers = centers
+
+        if model_name == CUBE:
+            self.cfg = CubeConfig(n)
+        elif model_name == PYRAMID:
+            self.cfg = PyramidConfig(n)
+        else:
+            raise ValueError('Invalid model name param')
 
         self.k = 1
 
@@ -86,7 +93,7 @@ class Model:
         if not self.light_sources:
             return None
 
-        side = CubeConfig().get_sides()[position_side]
+        side = self.cfg.get_sides()[position_side]
         center = self.centers.sides_centers[position_side]
 
         plane_points = [self.corners.carcass[key] for key in side]
@@ -235,7 +242,7 @@ class Cube(Model):
         ribs = Ribs(n, CUBE)
         centers = Centers(n, CUBE)
 
-        super().__init__(corners, ribs, centers, n)
+        super().__init__(corners, ribs, centers, n, CUBE)
 
 
 class Pyramid(Model):
@@ -244,7 +251,10 @@ class Pyramid(Model):
         ribs = Ribs(n, PYRAMID)
         centers = Centers(n, PYRAMID)
 
-        super().__init__(corners, ribs, centers, n)
+        self.turning_centers = None
+        self.extra = None
+
+        super().__init__(corners, ribs, centers, n, PYRAMID)
 
     def turn_side(self, name, angle):
         self.move(-self.center_point)
@@ -271,3 +281,26 @@ class Pyramid(Model):
 
         self.move(offset)
         self.move(self.center_point)
+
+    def init_turning_centers(self, name):
+        self.turning_centers, self.extra = self.centers.get_turning_centers(name)
+
+    def uninit_turning_centers(self):
+        self.turning_centers = None
+        self.extra = None
+
+    def update_sides(self, side, direction):
+        self.corners.update_sides(side, direction)
+        self.ribs.update_sides(side, direction)
+        self.centers.update_sides(side, direction, self.turning_centers, self.extra)
+
+    def turn_side_elements(self, name, angle, alpha, beta):
+        self.turn_oz_funcs(alpha.sin, alpha.cos)
+        self.turn_ox_funcs(beta.sin, beta.cos)
+
+        self.corners.turn_side_oy(name, angle)
+        self.ribs.turn_side_oy(name, angle)
+        self.centers.turn_side_oy(name, angle, self.turning_centers)
+
+        self.turn_ox_funcs(-beta.sin, beta.cos)
+        self.turn_oz_funcs(-alpha.sin, alpha.cos)

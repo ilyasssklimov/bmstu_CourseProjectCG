@@ -594,6 +594,7 @@ class PyramidConfig:
             for side in sides:
                 cnt = [0]
                 append_centers(positions[side], triplet_corners[side], cnt)
+                positions[side] = list(set(positions[side]))
 
         return positions
 

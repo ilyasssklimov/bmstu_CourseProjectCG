@@ -107,8 +107,8 @@ class Detail:
 
     def fill_detail(self, painter, vertices, color_side):
         color = self.colors[color_side]
-        # painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
-        # painter.fill(vertices)
+        painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
+        painter.fill(vertices)
 
     def draw(self, painter, visible_sides, shadows=None):
         for side in visible_sides:
@@ -117,7 +117,7 @@ class Detail:
                 for key in self.sides[side]:
                     edge = self.edges[key]
                     start, finish = self.vertices[edge.first], self.vertices[edge.second]
-                    painter.pcreate_line(start, finish)
+                    # painter.pcreate_line(start, finish)
                     vertices_pairs.append([start, finish])
 
                 vertices = get_vertices_by_pairs(vertices_pairs)
@@ -234,10 +234,10 @@ class Center(Detail):
         painter.fill(self.vertices.values())
 
     def fill_detail(self, painter, vertices=None, color_side=None):
-        for i in range(len(self.vertices)):
-            painter.pcreate_line(list(self.vertices.values())[i], list(self.vertices.values())[(i + 1) % 3])
-        # painter.setBrush(QBrush(QColor(*self.color), Qt.SolidPattern))
-        # painter.fill(self.vertices.values())
+        # for i in range(len(self.vertices)):
+        #     painter.pcreate_line(list(self.vertices.values())[i], list(self.vertices.values())[(i + 1) % 3])
+        painter.setBrush(QBrush(QColor(*self.color), Qt.SolidPattern))
+        painter.fill(self.vertices.values())
 
     def draw(self, painter, visible_sides, shadows=None):
         if not shadows:
@@ -573,10 +573,6 @@ class Centers:
             for center in self.centers[key]:
                 center.draw(painter, visible_sides, shadows)
 
-        # pen = QPen(Qt.red, 10)
-        # painter.setPen(pen)
-        # painter.pset_pixel(self.sides_centers['R'])
-
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
@@ -640,8 +636,50 @@ class Centers:
             for center in self.centers[key]:
                 center.turn_oz_funcs(sin_angle, cos_angle)
 
-    def turn_side_oy(self, name, angle):
+    def turn_side_oy(self, name, angle, centers=None):
         for key in self.centers:
             if name in key:
-                for rib in self.centers[key]:
-                    rib.turn_oy(angle)
+                for center in self.centers[key]:
+                    center.turn_oy(angle)
+
+        if isinstance(self.cfg, config.PyramidConfig) and centers:
+            for key in centers:
+                for center in centers[key]:
+                    center.turn_oy(angle)
+
+    def update_sides(self, side, direction, centers, extra):
+        exchange = self.cfg.get_exchanges_centers()[side]
+
+        dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
+        saved_ind = -1 if direction > 0 else 0
+
+        tmp = centers[find_by_key(centers, exchange[saved_ind])]
+        for i in dir_range:
+            i_to = find_by_key(centers, exchange[i + direction])
+            i_from = find_by_key(centers, exchange[i])
+            centers[i_to] = centers[i_from]
+            for j in range(len(centers[i_to])):
+                centers[i_to][j].set_name(i_to)
+        centers[find_by_key(centers, exchange[saved_ind + direction])] = tmp
+        for j in range(len(centers[find_by_key(centers, exchange[saved_ind + direction])])):
+            centers[find_by_key(centers, exchange[saved_ind + direction])][j].set_name(
+                find_by_key(centers, exchange[saved_ind + direction]))
+
+        for key in centers:
+            self.centers[key] = centers[key] + extra[key]
+
+    def get_turning_centers(self, name):
+        centers = dict()
+        extra = dict()
+
+        side_center = self.sides_centers[name]
+        for key in self.centers:
+            if name not in key:
+                distances = [(round(side_center.get_dist_to_point(center.get_center_by_name())), center)
+                             for center in self.centers[key]]
+                distances.sort(key=lambda x: x[0])
+
+                centers[key] = [distances[0][1], distances[1][1]]  # [distance[1] for distance in distances[:2]]
+                extra[key] = [distances[2][1]]
+
+        return centers, extra
