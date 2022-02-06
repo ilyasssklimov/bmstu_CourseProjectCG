@@ -11,7 +11,10 @@ class QtDrawer(QPainter):
         self.drawLine(int(point_1.x), int(point_1.y), int(point_2.x), int(point_2.y))
 
     def set_pixel(self, x, y):
-        self.drawPoint(x, y)
+        self.drawPoint(int(x), int(y))
+
+    def pset_pixel(self, point):
+        self.drawPoint(int(point.x), int(point.y))
 
     def draw_point(self, point):
         self.drawPoint(point.x, point.y)
