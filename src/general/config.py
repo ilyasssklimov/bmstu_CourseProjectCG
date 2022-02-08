@@ -701,10 +701,10 @@ class PyramidConfig:
 
     def get_opposite(self, side):
         sides = {
-            'F': 'D',
-            'L': 'R',
-            'R': 'L',
-            'D': 'F',
+            'F': 'F',
+            'L': 'L',
+            'R': 'R',
+            'D': 'D',
         }
         return sides[side]
 

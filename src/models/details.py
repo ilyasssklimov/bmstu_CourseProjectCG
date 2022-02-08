@@ -17,6 +17,7 @@ class Detail:
             self.cfg = config.PyramidConfig()
         else:
             raise ValueError('Invalid model name param')
+        self.model_name = model_name
 
         self.vertices = vertices
         self.edges = edges
@@ -158,7 +159,7 @@ class Detail:
         opposite_side = self.cfg.get_opposite(turning_side)
         # if opposite_side in visible_sides:
         if turning_side not in visible_sides:
-            if isinstance(self.cfg, config.CubeConfig):
+            if self.model_name == config.CUBE:
                 self.fill_detail(painter, sides_vertices[opposite_side], 'black')
 
     def get_center_z(self):
@@ -191,7 +192,13 @@ class Detail:
 
         center = self.get_center_by_name(vertices)
 
-        plane_points = [vertices[0], *vertices[2:-1]]
+        if self.model_name == config.CUBE:
+            plane_points = [vertices[0], *vertices[2:-1]]
+        elif self.model_name == config.PYRAMID:
+            plane_points = vertices[:-1]
+        else:
+            plane_points = []
+
         normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
         normal.adjust(center, Point(*model_center))
 
@@ -271,7 +278,13 @@ class Center(Detail):
         center = self.get_center_by_name()
 
         vertices = list(self.vertices.values())
-        plane_points = [vertices[0], *vertices[2:]]
+
+        if self.model_name == config.CUBE:
+            plane_points = [vertices[0], *vertices[2]]
+        elif self.model_name == config.PYRAMID:
+            plane_points = vertices[:]
+        else:
+            plane_points = []
 
         normal = Vector(MatrixPlane(plane_points).get_determinant()[:-1])
         normal.adjust(center, Point(*model_center))
@@ -575,6 +588,8 @@ class Centers:
         else:
             raise ValueError('Invalid model name param')
 
+        self.model_name = model_name
+
         self.sides_centers = None
         self.init_sides_centers()
         self.n = n
@@ -683,7 +698,7 @@ class Centers:
                 for center in self.centers[key]:
                     center.turn_oy(angle)
 
-        if isinstance(self.cfg, config.PyramidConfig) and centers:
+        if self.model_name == config.PYRAMID and centers:
             for key in centers:
                 for center in centers[key]:
                     center.turn_oy(angle)
