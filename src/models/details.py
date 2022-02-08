@@ -576,6 +576,18 @@ class Centers:
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
+    def draw_below_turning(self, painter, visible_sides, centers, shadows=None):
+        if self.n == 2:
+            return
+
+        for key in centers:
+            if key in visible_sides:
+                for center in centers[key]:
+                    center.draw(painter, visible_sides, shadows)
+
+        pen = QPen(Qt.black, 6)
+        painter.setPen(pen)
+
     def get_center(self, side):
         if self.n == 2:
             return {}

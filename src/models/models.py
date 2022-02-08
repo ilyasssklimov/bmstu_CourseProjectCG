@@ -304,3 +304,42 @@ class Pyramid(Model):
 
         self.turn_ox_funcs(-beta.sin, beta.cos)
         self.turn_oz_funcs(-alpha.sin, alpha.cos)
+
+    def draw_turning(self, painter, side, plastic_part):
+        def draw_below_turning(shadows_=None):
+            self.ribs.draw_below_turning(painter, self.visible_sides, side, shadows_)
+            self.centers.draw_below_turning(painter, self.visible_sides, self.extra, shadows_)
+            self.corners.draw_below_turning(painter, self.visible_sides, side, shadows_)
+
+        def draw_static_plastic_part():
+            painter.setBrush(QBrush(QColor('black'), Qt.SolidPattern))
+            painter.fill(plastic_part)
+
+        pen = QPen(Qt.black, 6)
+        painter.setPen(pen)
+        shadows = None if not self.light_sources else self.count_shadows()
+
+        if side in self.visible_sides:
+            draw_below_turning(shadows)
+            draw_static_plastic_part()
+            self.artist(painter, side)
+        else:
+            self.artist(painter, side)
+            draw_below_turning(shadows)
+
+    def artist(self, painter, side):
+        corners = self.corners.get_centers(side)
+        ribs = self.ribs.get_centers(side)
+        centers = self.centers.get_center(side)
+        eccentric = corners | ribs | centers
+
+        turning_centers = {}
+        center_details = [center for pairs in self.turning_centers.values() for center in pairs]
+        for center in center_details:
+            turning_centers[center] = center.get_center_z()
+        eccentric |= turning_centers
+
+        details = sorted(eccentric, key=eccentric.get)
+
+        for detail in details:
+            detail.draw_turning(painter, self.visible_sides, side, self.matrix_center[:-1], self.light_sources)
