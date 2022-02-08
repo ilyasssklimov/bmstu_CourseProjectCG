@@ -343,3 +343,6 @@ class Pyramid(Model):
 
         for detail in details:
             detail.draw_turning(painter, self.visible_sides, side, self.matrix_center[:-1], self.light_sources)
+
+    def get_static_plastic_part(self, side):
+        return self.corners.get_static_pyramid_plastic(side)

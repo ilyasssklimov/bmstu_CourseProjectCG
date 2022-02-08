@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QBrush, QPen
 import src.general.config as config
-from copy import deepcopy
+from copy import deepcopy, copy
 from src.utils.point import divide_line_by_num
 from src.utils.matrix import MatrixPlane
 from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_plane_cosine
@@ -90,7 +90,6 @@ class Detail:
         self.sides[exchange[saved_ind + direction]] = tmp
 
         set_name = set(self.name)
-        # print(f'{self.name = }, in update {self.prev_name = }, {self.name = }')
         set_prev_name = set(self.prev_name)
         old_letter = list(set_prev_name - set_name)
         new_letter = list(set_name - set_prev_name)
@@ -211,6 +210,9 @@ class Detail:
                 center += self.vertices[key]
 
         return center / 3
+
+    def get_vertices_by_edge(self, edge):
+        return self.edges[edge].get_points(self.vertices)
 
 
 class Corner(Detail):
@@ -339,6 +341,28 @@ class Corners:
         plastic_vertices = []
         for up_vertex, low_vertex in zip(upper_vertices, lower_vertices):
             plastic_vertices.append(divide_line_by_num(low_vertex, up_vertex, alpha))
+
+        return plastic_vertices
+
+    def get_static_pyramid_plastic(self, side):
+        vertices = self.cfg.get_plastic_vertices()[side][0]
+        general = self.cfg.get_plastic_vertices()[side][1]
+        plastic_vertices = []
+
+        for vertex in vertices:
+            sides = {side: edges for side, edges in self.corners[vertex].sides.items() if side in general}
+            vertices_by_sides = dict()
+            for side, edges in sides.items():
+                vertices_by_sides[side] = [vert for edge in edges
+                                           for vert in self.corners[vertex].get_vertices_by_edge(edge)]
+            general_vertex = None
+            for verts in vertices_by_sides.values():
+                if general_vertex:
+                    general_vertex &= set(verts)
+                else:
+                    general_vertex = set(verts)
+
+            plastic_vertices.append(copy(next(iter(general_vertex))))
 
         return plastic_vertices
 

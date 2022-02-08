@@ -649,6 +649,16 @@ class PyramidConfig:
 
         return corners
 
+    def get_plastic_vertices(self):
+        vertices = {
+            'F': [('LRF', 'RFD', 'LFD'), ('L', 'R', 'D')],
+            'L': [('LRF', 'LFD', 'LRD'), 'RFD'],
+            'R': [('LRF', 'RFD', 'LRD'), 'LFD'],
+            'D': [('LRD', 'RFD', 'LFD'), 'LRF']
+        }
+
+        return vertices
+
     def get_exchanges_corners(self):
         exchanges_corners = {
             'F': ['LRF', 'RFD', 'LFD'],
