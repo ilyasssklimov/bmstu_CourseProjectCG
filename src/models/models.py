@@ -227,7 +227,6 @@ class Model:
 
         visible_res = self.matrix_body.multiplication_vector(self.viewer)
         self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
-        # self.visible_sides = ['R']  # , 'L', 'R', 'D']
 
     def add_light(self, point):
         self.light_sources.append(point)
@@ -315,6 +314,10 @@ class Pyramid(Model):
             painter.setBrush(QBrush(QColor('black'), Qt.SolidPattern))
             painter.fill(plastic_part)
 
+        def draw_dynamic_plastic_part():
+            painter.setBrush(QBrush(QColor('black'), Qt.SolidPattern))
+            painter.fill(self.corners.get_static_pyramid_plastic(side, False))
+
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
         shadows = None if not self.light_sources else self.count_shadows()
@@ -325,6 +328,7 @@ class Pyramid(Model):
             self.artist(painter, side)
         else:
             self.artist(painter, side)
+            draw_dynamic_plastic_part()
             draw_below_turning(shadows)
 
     def artist(self, painter, side):

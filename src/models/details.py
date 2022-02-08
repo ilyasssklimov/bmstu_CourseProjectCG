@@ -156,8 +156,10 @@ class Detail:
                     self.fill_shadow_detail(painter, sides_vertices[side], color_side, shadow)
 
         opposite_side = self.cfg.get_opposite(turning_side)
-        if opposite_side in visible_sides:
-            self.fill_detail(painter, sides_vertices[opposite_side], 'black')
+        # if opposite_side in visible_sides:
+        if turning_side not in visible_sides:
+            if isinstance(self.cfg, config.CubeConfig):
+                self.fill_detail(painter, sides_vertices[opposite_side], 'black')
 
     def get_center_z(self):
         center = 0
@@ -344,7 +346,7 @@ class Corners:
 
         return plastic_vertices
 
-    def get_static_pyramid_plastic(self, side):
+    def get_static_pyramid_plastic(self, side, copied=True):
         vertices = self.cfg.get_plastic_vertices()[side][0]
         general = self.cfg.get_plastic_vertices()[side][1]
         plastic_vertices = []
@@ -362,7 +364,10 @@ class Corners:
                 else:
                     general_vertex = set(verts)
 
-            plastic_vertices.append(copy(next(iter(general_vertex))))
+            if copied:
+                plastic_vertices.append(copy(next(iter(general_vertex))))
+            else:
+                plastic_vertices.append(next(iter(general_vertex)))
 
         return plastic_vertices
 

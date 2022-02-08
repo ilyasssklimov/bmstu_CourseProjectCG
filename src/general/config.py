@@ -651,7 +651,7 @@ class PyramidConfig:
 
     def get_plastic_vertices(self):
         vertices = {
-            'F': [('LRF', 'RFD', 'LFD'), ('L', 'R', 'D')],
+            'F': [('LRF', 'RFD', 'LFD'), 'LRD'],
             'L': [('LRF', 'LFD', 'LRD'), 'RFD'],
             'R': [('LRF', 'RFD', 'LRD'), 'LFD'],
             'D': [('LRD', 'RFD', 'LFD'), 'LRF']
