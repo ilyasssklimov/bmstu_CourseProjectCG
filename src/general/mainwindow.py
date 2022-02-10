@@ -128,8 +128,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model = Cube(size)
             self.angle_to_turn = 90
 
-            # self.model.turn_oy(45)
-            # self.model.turn_ox(-30)
+            self.model.turn_oy(45)
+            self.model.turn_ox(-30)
 
             self.update()
         elif model == PYRAMID:
@@ -137,8 +137,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.angle_to_turn = 120
 
-            # self.model.turn_oy(60)
-            # self.model.turn_ox(-30)
+            self.model.turn_oy(60)
+            self.model.turn_ox(-30)
 
             self.update()
         elif model == MEGAMINX:

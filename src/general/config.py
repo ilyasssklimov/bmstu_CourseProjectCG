@@ -709,12 +709,47 @@ class PyramidConfig:
         return sides[side]
 
 
-'''
 class MegaminxConfig:
     def __init__(self, n=3):
         self.n = n
         self.size = Config().size / self.n
 
+    def get_eccentric_data(self):
+        # Косинус двухранного угла = -sqrt(5) / 5
+        vertices = {
+            'LFD': (-self.size, self.size, self.size),
+            'LFU': (-self.size, -self.size, self.size),
+            'RFU': (self.size, -self.size, self.size),
+            'RFD': (self.size, self.size, self.size),
+
+            'LBD': (-self.size, self.size, -self.size),
+            'LBU': (-self.size, -self.size, -self.size),
+            'RBU': (self.size, -self.size, -self.size),
+            'RBD': (self.size, self.size, -self.size)
+        }
+        vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
+
+        edges = {
+            'LF': ('LFD', 'LFU'),
+            'UF': ('LFU', 'RFU'),
+            'RF': ('RFU', 'RFD'),
+            'DF': ('RFD', 'LFD'),
+
+            'LD': ('LFD', 'LBD'),
+            'LU': ('LFU', 'LBU'),
+            'RU': ('RFU', 'RBU'),
+            'RD': ('RFD', 'RBD'),
+
+            'LB': ('LBD', 'LBU'),
+            'UB': ('LBU', 'RBU'),
+            'RB': ('RBU', 'RBD'),
+            'DB': ('RBD', 'LBD')
+        }
+        edges = {key: Edge(*edge) for key, edge in edges.items()}
+
+        return vertices, edges
+
+    '''
     def get_center_data(self, name):
         match name:
             case 'L':
@@ -800,40 +835,6 @@ class MegaminxConfig:
 
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
         edges = [Edge(*edge) for edge in edges]
-
-        return vertices, edges
-
-    def get_eccentric_data(self):
-        vertices = {
-            'LFD': (-self.size, self.size, self.size),
-            'LFU': (-self.size, -self.size, self.size),
-            'RFU': (self.size, -self.size, self.size),
-            'RFD': (self.size, self.size, self.size),
-
-            'LBD': (-self.size, self.size, -self.size),
-            'LBU': (-self.size, -self.size, -self.size),
-            'RBU': (self.size, -self.size, -self.size),
-            'RBD': (self.size, self.size, -self.size)
-        }
-        vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
-
-        edges = {
-            'LF': ('LFD', 'LFU'),
-            'UF': ('LFU', 'RFU'),
-            'RF': ('RFU', 'RFD'),
-            'DF': ('RFD', 'LFD'),
-
-            'LD': ('LFD', 'LBD'),
-            'LU': ('LFU', 'LBU'),
-            'RU': ('RFU', 'RBU'),
-            'RD': ('RFD', 'RBD'),
-
-            'LB': ('LBD', 'LBU'),
-            'UB': ('LBU', 'RBU'),
-            'RB': ('RBU', 'RBD'),
-            'DB': ('RBD', 'LBD')
-        }
-        edges = {key: Edge(*edge) for key, edge in edges.items()}
 
         return vertices, edges
 

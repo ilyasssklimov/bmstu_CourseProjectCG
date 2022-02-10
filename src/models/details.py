@@ -280,7 +280,7 @@ class Center(Detail):
         vertices = list(self.vertices.values())
 
         if self.model_name == config.CUBE:
-            plane_points = [vertices[0], *vertices[2]]
+            plane_points = [vertices[0], *vertices[2:]]
         elif self.model_name == config.PYRAMID:
             plane_points = vertices[:]
         else:
@@ -735,7 +735,7 @@ class Centers:
                              for center in self.centers[key]]
                 distances.sort(key=lambda x: x[0])
 
-                centers[key] = [distances[0][1], distances[1][1]]  # [distance[1] for distance in distances[:2]]
+                centers[key] = [distances[0][1], distances[1][1]]
                 extra[key] = [distances[2][1]]
 
         return centers, extra
