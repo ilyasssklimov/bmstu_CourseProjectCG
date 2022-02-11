@@ -350,3 +350,42 @@ class Pyramid(Model):
 
     def get_static_plastic_part(self, side):
         return self.corners.get_static_pyramid_plastic(side)
+
+
+class Megaminx:
+    def __init__(self, n):
+        self.n = n
+        self.corners = corners
+        self.ribs = ribs
+        self.centers = centers
+
+        if model_name == CUBE:
+            self.cfg = CubeConfig(n)
+        elif model_name == PYRAMID:
+            self.cfg = PyramidConfig(n)
+        else:
+            raise ValueError('Invalid model name param')
+
+        self.k = 1
+
+        cfg = Config()
+        dx, dy, dz = cfg.dx, cfg.dy, cfg.dz
+        self.center_point = Point(dx, dy, dz)
+
+        self.matrix_center = [dx, dy, dz, 1]
+        self.viewer = [dx, dy, dz + 100000, 0]
+        self.matrix_body = None
+
+        self.light_sources = []
+
+        self.visible_sides = []
+        self.set_visible_sides()
+
+    def draw(self, painter):
+        pen = QPen(Qt.black, 6)
+        painter.setPen(pen)
+        shadows = None if not self.light_sources else self.count_shadows()
+
+        self.corners.draw(painter, self.visible_sides, shadows)
+        self.ribs.draw(painter, self.visible_sides, shadows)
+        self.centers.draw(painter, self.visible_sides, shadows)
