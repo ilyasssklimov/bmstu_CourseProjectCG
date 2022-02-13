@@ -355,16 +355,7 @@ class Pyramid(Model):
 class Megaminx:
     def __init__(self, n):
         self.n = n
-        self.corners = corners
-        self.ribs = ribs
-        self.centers = centers
-
-        if model_name == CUBE:
-            self.cfg = CubeConfig(n)
-        elif model_name == PYRAMID:
-            self.cfg = PyramidConfig(n)
-        else:
-            raise ValueError('Invalid model name param')
+        self.corners = Corners(n, MEGAMINX)
 
         self.k = 1
 
@@ -378,14 +369,36 @@ class Megaminx:
 
         self.light_sources = []
 
-        self.visible_sides = []
-        self.set_visible_sides()
+        self.visible_sides = ['F']
 
     def draw(self, painter):
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
-        shadows = None if not self.light_sources else self.count_shadows()
 
-        self.corners.draw(painter, self.visible_sides, shadows)
-        self.ribs.draw(painter, self.visible_sides, shadows)
-        self.centers.draw(painter, self.visible_sides, shadows)
+        self.corners.draw(painter, self.visible_sides)
+
+    def move(self, point):
+        self.corners.move(point)
+
+    def scale(self, k):
+        k = k if k else 1
+        tmp = k / self.k
+
+        self.corners.scale(tmp, self.center_point)
+
+        self.k = k
+
+    def turn_ox(self, angle):
+        self.move(-self.center_point)
+        self.corners.turn_ox(angle)
+        self.move(self.center_point)
+
+    def turn_oy(self, angle):
+        self.move(-self.center_point)
+        self.corners.turn_oy(angle)
+        self.move(self.center_point)
+
+    def turn_oz(self, angle):
+        self.move(-self.center_point)
+        self.corners.turn_oz(angle)
+        self.move(self.center_point)

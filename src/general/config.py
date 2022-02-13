@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt, tan, degrees, radians
 from src.utils.edge import Edge
 from src.general.errors import SideNameError
 from src.utils.point import Point
@@ -716,16 +716,19 @@ class MegaminxConfig:
 
     def get_eccentric_data(self):
         # Косинус двухранного угла = -sqrt(5) / 5
-        vertices = {
-            'LFD': (-self.size, self.size, self.size),
-            'LFU': (-self.size, -self.size, self.size),
-            'RFU': (self.size, -self.size, self.size),
-            'RFD': (self.size, self.size, self.size),
+        a = self.size / 2
+        offset = a / tan(radians(72))
 
-            'LBD': (-self.size, self.size, -self.size),
+        vertices = {
+            'LFD': (-a, a, self.size),
+            'LFU': (-a + offset, -a, self.size),
+            'RFU': (a, -a, self.size),
+            'RFD': (a - offset, a, self.size),
+
+            'LBD': (-self.size - offset, self.size, -self.size),
             'LBU': (-self.size, -self.size, -self.size),
-            'RBU': (self.size, -self.size, -self.size),
-            'RBD': (self.size, self.size, -self.size)
+            'RBU': (self.size - offset, -self.size, -self.size),
+            'RBD': (self.size - 2 * offset, self.size, -self.size)
         }
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
 
@@ -749,6 +752,44 @@ class MegaminxConfig:
 
         return vertices, edges
 
+    def get_offset_corners(self):
+        offset = Config().size * (self.n - 1) / self.n
+        positions = {
+            'LFU': (0, 0, 0),
+
+        }
+
+        # 'LFD': (-offset, offset, offset),
+        """
+          'RFU': (offset, -offset, offset),
+          'RFD': (offset, offset, offset),
+
+          'LBD': (-offset, offset, -offset),
+          'LBU': (-offset, -offset, -offset),
+          'RBU': (offset, -offset, -offset),
+          'RBD': (offset, offset, -offset)
+        """
+        return positions
+
+    def get_center_colors(self):
+        colors = {
+            'F': (255, 255, 255),
+            'B': (255, 255, 0),
+            'R': (255, 0, 0),
+            'L': (255, 165, 0),
+            'U': (0, 0, 255),
+            'D': (0, 128, 0),
+            'black': (0, 0, 0)
+        }
+
+        return colors
+
+    def get_eccentric_detail_sides(self):
+        sides = {
+            'F': ('LF', 'UF', 'RF', 'DF'),
+        }
+
+        return sides
     '''
     def get_center_data(self, name):
         match name:

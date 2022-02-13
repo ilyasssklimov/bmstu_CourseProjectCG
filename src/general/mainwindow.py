@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets, QtCore
 from src.general.config import Config, get_colors, CUBE, PYRAMID, MEGAMINX, PyramidConfig
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
-from src.models.models import Cube, Pyramid
+from src.models.models import Cube, Pyramid, Megaminx
 from src.utils.mymath import sign, Vector, Angle
 from src.utils.point import Point
 
@@ -31,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.speed = 2
         self.angle_to_turn = 120
 
-        self.models.setCurrentText('Пирамидка')
+        self.models.setCurrentText('Мегаминкс')
         self.sizeModel.setCurrentText('3x3x3')
         self.load_model()
 
@@ -142,7 +142,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.update()
         elif model == MEGAMINX:
-            print('megaminx')
+            self.model = Megaminx(size)
+
+            self.angle_to_turn = 108
+
+            self.update()
 
     def mix_model(self):
         print('Temporarily does\'not work :(')

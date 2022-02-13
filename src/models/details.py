@@ -15,6 +15,8 @@ class Detail:
             self.cfg = config.CubeConfig()
         elif model_name == config.PYRAMID:
             self.cfg = config.PyramidConfig()
+        elif model_name == config.MEGAMINX:
+            self.cfg = config.MegaminxConfig()
         else:
             raise ValueError('Invalid model name param')
         self.model_name = model_name
@@ -107,8 +109,8 @@ class Detail:
 
     def fill_detail(self, painter, vertices, color_side):
         color = self.colors[color_side]
-        painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
-        painter.fill(vertices)
+        # painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
+        # painter.fill(vertices)
 
     def draw(self, painter, visible_sides, shadows=None):
         for side in visible_sides:
@@ -117,7 +119,7 @@ class Detail:
                 for key in self.sides[side]:
                     edge = self.edges[key]
                     start, finish = self.vertices[edge.first], self.vertices[edge.second]
-                    # painter.pcreate_line(start, finish)
+                    painter.pcreate_line(start, finish)
                     vertices_pairs.append([start, finish])
 
                 vertices = get_vertices_by_pairs(vertices_pairs)
@@ -305,11 +307,13 @@ class Corners:
             self.cfg = config.CubeConfig(n)
         elif model_name == config.PYRAMID:
             self.cfg = config.PyramidConfig(n)
+        elif model_name == config.MEGAMINX:
+            self.cfg = config.MegaminxConfig(n)
         else:
             raise ValueError('Invalid model name param')
 
-        self.carcass = None
-        self.init_extra_points()
+        self.carcass = []  # None
+        # self.init_extra_points()
 
         vertices, edges = self.cfg.get_eccentric_data()
         positions = self.cfg.get_offset_corners()
