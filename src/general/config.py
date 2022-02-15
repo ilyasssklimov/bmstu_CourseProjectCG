@@ -714,22 +714,40 @@ class MegaminxConfig:
         self.n = n
         self.size = Config().size / self.n
 
-    def get_eccentric_data(self):
-        # Косинус двухранного угла = -sqrt(5) / 5
-        a = self.size / 2
+    def get_eccentric_data(self, position='right'):
+        # Косинус двухгранного угла = -sqrt(5) / 5
+        a = self.size
         offset = a / tan(radians(72))
+        offset_2 = a / tan(radians(116))
+        # 2 * x - offset = a => x = (a - offset) / 2
 
-        vertices = {
-            'LFD': (-a, a, self.size),
-            'LFU': (-a + offset, -a, self.size),
-            'RFU': (a, -a, self.size),
-            'RFD': (a - offset, a, self.size),
+        if position == 'left':
+            vertices = {
+                'LFD': ((-a + offset) / 2, a / 2, a / 2),
+                'LFU': (-a + offset, -a / 2, a / 2),
+                'RFU': ((a - offset) / 2, -a / 2, a / 2),
+                'RFD': (a - offset, a / 2, a / 2),
 
-            'LBD': (-self.size - offset, self.size, -self.size),
-            'LBU': (-self.size, -self.size, -self.size),
-            'RBU': (self.size - offset, -self.size, -self.size),
-            'RBD': (self.size - 2 * offset, self.size, -self.size)
-        }
+                'LBD': ((-a + offset) / 2 - offset / 2, a / 2, -a / 2),
+                'LBU': (-a + offset - offset / 2, -a / 2, -a / 2),
+                'RBU': ((a - offset) / 2 - offset / 2, -a / 2, -a / 2),
+                'RBD': ((a - offset) / 2 - offset / 2, a / 2, -a / 2)
+            }
+        elif position == 'right':
+            vertices = {
+                'LFD': ((-a + offset) / 2, a / 2, a / 2),
+                'LFU': (-a + offset, -a / 2, a / 2),
+                'RFU': ((a - offset) / 2, -a / 2, a / 2),
+                'RFD': (a - offset, a / 2, a / 2),
+
+                'LBD': ((-a + offset) / 2 - offset_2 / 2, a / 2, -a / 2),
+                'LBU': (-a + offset - offset_2 / 2, -a / 2, -a / 2),
+                'RBU': ((a - offset) / 2 - offset_2 / 2, -a / 2, -a / 2),
+                'RBD': (a - offset - offset_2 / 2, a / 2, -a / 2)
+            }
+        else:
+            raise ValueError('Incorrect position')
+
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
 
         edges = {
@@ -755,7 +773,7 @@ class MegaminxConfig:
     def get_offset_corners(self):
         offset = Config().size * (self.n - 1) / self.n
         positions = {
-            'LFU': (0, 0, 0),
+            'RLDBFU': (0, 0, 0),
 
         }
 
@@ -786,7 +804,12 @@ class MegaminxConfig:
 
     def get_eccentric_detail_sides(self):
         sides = {
+            'U': ('UF', 'LU', 'RU', 'UB'),
+            'D': ('DF', 'LD', 'RD', 'DB'),
+            'R': ('RF', 'RU', 'RD', 'RB'),
+            'L': ('LF', 'LD', 'LU', 'LB'),
             'F': ('LF', 'UF', 'RF', 'DF'),
+            'B': ('LB', 'UB', 'RB', 'DB')
         }
 
         return sides

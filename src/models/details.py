@@ -315,7 +315,10 @@ class Corners:
         self.carcass = []  # None
         # self.init_extra_points()
 
-        vertices, edges = self.cfg.get_eccentric_data()
+        if isinstance(self.cfg, config.CubeConfig | config.PyramidConfig):
+            vertices, edges = self.cfg.get_eccentric_data()
+        else:
+            pass
         positions = self.cfg.get_offset_corners()
 
         self.corners = {}

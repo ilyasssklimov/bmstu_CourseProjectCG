@@ -369,7 +369,7 @@ class Megaminx:
 
         self.light_sources = []
 
-        self.visible_sides = ['F']
+        self.visible_sides = ['F', 'R', 'B', 'U', 'D', 'L']
 
     def draw(self, painter):
         pen = QPen(Qt.black, 6)
