@@ -318,7 +318,8 @@ class Corners:
         if isinstance(self.cfg, config.CubeConfig | config.PyramidConfig):
             vertices, edges = self.cfg.get_eccentric_data()
         else:
-            pass
+            vertices, edges = self.cfg.get_corner_data()
+
         positions = self.cfg.get_offset_corners()
 
         self.corners = {}

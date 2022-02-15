@@ -1,4 +1,4 @@
-from math import sqrt, tan, degrees, radians
+from math import sqrt, tan, degrees, radians, acos
 from src.utils.edge import Edge
 from src.general.errors import SideNameError
 from src.utils.point import Point
@@ -714,10 +714,12 @@ class MegaminxConfig:
         self.n = n
         self.size = Config().size / self.n
 
-    def get_eccentric_data(self, position='right'):
-        # Косинус двухгранного угла = -sqrt(5) / 5
+    def get_corner_data(self, position='right'):
+        # Косинус двугранного угла = -sqrt(5) / 5
         a = self.size
         offset = a / tan(radians(72))
+        dihedral = acos(-sqrt(5) / 5)
+
         offset_2 = a / tan(radians(116))
         # 2 * x - offset = a => x = (a - offset) / 2
 
