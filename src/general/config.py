@@ -717,35 +717,34 @@ class MegaminxConfig:
     def get_corner_data(self, position='right'):
         # Косинус двугранного угла = -sqrt(5) / 5
         a = self.size
-        offset = a / tan(radians(72))
-        dihedral = acos(-sqrt(5) / 5)
+        plane_offset = a / tan(radians(72))
+        dihedral_offset = a / tan(acos(sqrt(5) / 5))
 
-        offset_2 = a / tan(radians(116))
         # 2 * x - offset = a => x = (a - offset) / 2
 
         if position == 'left':
             vertices = {
-                'LFD': ((-a + offset) / 2, a / 2, a / 2),
-                'LFU': (-a + offset, -a / 2, a / 2),
-                'RFU': ((a - offset) / 2, -a / 2, a / 2),
-                'RFD': (a - offset, a / 2, a / 2),
+                'LFD': ((-a + plane_offset) / 2, a / 2, a / 2),
+                'LFU': (-a + plane_offset, -a / 2, a / 2),
+                'RFU': ((a - plane_offset) / 2, -a / 2, a / 2),
+                'RFD': (a - plane_offset, a / 2, a / 2),
 
-                'LBD': ((-a + offset) / 2 - offset / 2, a / 2, -a / 2),
-                'LBU': (-a + offset - offset / 2, -a / 2, -a / 2),
-                'RBU': ((a - offset) / 2 - offset / 2, -a / 2, -a / 2),
-                'RBD': ((a - offset) / 2 - offset / 2, a / 2, -a / 2)
+                'LBD': ((-a + plane_offset) / 2 - plane_offset / 2, a / 2, -a / 2),
+                'LBU': (-a + plane_offset - plane_offset / 2, -a / 2, -a / 2),
+                'RBU': ((a - plane_offset) / 2 - plane_offset / 2, -a / 2, -a / 2),
+                'RBD': ((a - plane_offset) / 2 - plane_offset / 2, a / 2, -a / 2)
             }
         elif position == 'right':
             vertices = {
-                'LFD': ((-a + offset) / 2, a / 2, a / 2),
-                'LFU': (-a + offset, -a / 2, a / 2),
-                'RFU': ((a - offset) / 2, -a / 2, a / 2),
-                'RFD': (a - offset, a / 2, a / 2),
+                'LFD': ((-a + plane_offset) / 2, a / 2, a / 2),
+                'LFU': (-a + plane_offset, -a / 2, a / 2),
+                'RFU': ((a - plane_offset) / 2, -a / 2, a / 2),
+                'RFD': (a - plane_offset, a / 2, a / 2),
 
-                'LBD': ((-a + offset) / 2 - offset_2 / 2, a / 2, -a / 2),
-                'LBU': (-a + offset - offset_2 / 2, -a / 2, -a / 2),
-                'RBU': ((a - offset) / 2 - offset_2 / 2, -a / 2, -a / 2),
-                'RBD': (a - offset - offset_2 / 2, a / 2, -a / 2)
+                'LBD': ((-a + plane_offset) / 2 + dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2),
+                'LBU': (-a + plane_offset + dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
+                'RBU': ((a - plane_offset) / 2 + dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
+                'RBD': (a - plane_offset + dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2)
             }
         else:
             raise ValueError('Incorrect position')
@@ -775,7 +774,7 @@ class MegaminxConfig:
     def get_offset_corners(self):
         offset = Config().size * (self.n - 1) / self.n
         positions = {
-            'RLDBFU': (0, 0, 0),
+            'RFU': (0, 0, 0),
 
         }
 
