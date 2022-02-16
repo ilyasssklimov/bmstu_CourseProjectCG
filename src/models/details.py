@@ -315,15 +315,17 @@ class Corners:
         self.carcass = []  # None
         # self.init_extra_points()
 
-        if isinstance(self.cfg, config.CubeConfig | config.PyramidConfig):
+        if model_name != config.MEGAMINX:
             vertices, edges = self.cfg.get_eccentric_data()
         else:
-            vertices, edges = self.cfg.get_corner_data()
+            vertices, edges = None, None
 
         positions = self.cfg.get_offset_corners()
 
         self.corners = {}
         for key, value in positions.items():
+            if model_name == config.MEGAMINX:
+                vertices, edges = self.cfg.get_corner_data(key)
             self.corners[key] = Corner(deepcopy(vertices), edges, Point(*value), key, model_name)
 
     def init_extra_points(self):

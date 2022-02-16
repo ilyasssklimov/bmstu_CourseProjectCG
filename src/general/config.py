@@ -714,7 +714,7 @@ class MegaminxConfig:
         self.n = n
         self.size = Config().size / self.n
 
-    def get_corner_data(self, position='right'):
+    def get_corner_data(self, name):
         # Косинус двугранного угла = -sqrt(5) / 5
         a = self.size
         plane_offset = a / tan(radians(72))
@@ -722,32 +722,66 @@ class MegaminxConfig:
 
         # 2 * x - offset = a => x = (a - offset) / 2
 
-        if position == 'left':
-            vertices = {
-                'LFD': ((-a + plane_offset) / 2, a / 2, a / 2),
-                'LFU': (-a + plane_offset, -a / 2, a / 2),
-                'RFU': ((a - plane_offset) / 2, -a / 2, a / 2),
-                'RFD': (a - plane_offset, a / 2, a / 2),
+        match name:
+            case 'RFU':
+                vertices = {
+                    'LFD': ((-a + plane_offset) / 2, a / 2, a / 2),
+                    'LFU': (-a + plane_offset, -a / 2, a / 2),
+                    'RFU': ((a - plane_offset) / 2, -a / 2, a / 2),
+                    'RFD': (a - plane_offset, a / 2, a / 2),
 
-                'LBD': ((-a + plane_offset) / 2 - plane_offset / 2, a / 2, -a / 2),
-                'LBU': (-a + plane_offset - plane_offset / 2, -a / 2, -a / 2),
-                'RBU': ((a - plane_offset) / 2 - plane_offset / 2, -a / 2, -a / 2),
-                'RBD': ((a - plane_offset) / 2 - plane_offset / 2, a / 2, -a / 2)
-            }
-        elif position == 'right':
-            vertices = {
-                'LFD': ((-a + plane_offset) / 2, a / 2, a / 2),
-                'LFU': (-a + plane_offset, -a / 2, a / 2),
-                'RFU': ((a - plane_offset) / 2, -a / 2, a / 2),
-                'RFD': (a - plane_offset, a / 2, a / 2),
+                    'LBD': ((-a + plane_offset) / 2 + dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2),
+                    'LBU': (-a + plane_offset + dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
+                    'RBU': ((a - plane_offset) / 2 + dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
+                    'RBD': (a - plane_offset + dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2)
+                }
+            case 'LFU':
+                vertices = {
+                    'LFD': (-a + plane_offset, a / 2, a / 2),
+                    'LFU': ((-a + plane_offset) / 2, -a / 2, a / 2),
+                    'RFU': (a - plane_offset, -a / 2, a / 2),
+                    'RFD': ((a - plane_offset) / 2, a / 2, a / 2),
 
-                'LBD': ((-a + plane_offset) / 2 + dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2),
-                'LBU': (-a + plane_offset + dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
-                'RBU': ((a - plane_offset) / 2 + dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
-                'RBD': (a - plane_offset + dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2)
-            }
-        else:
-            raise ValueError('Incorrect position')
+                    'LBD': (-a + plane_offset - dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2),
+                    'LBU': ((-a + plane_offset) / 2 - dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
+                    'RBU': (a - plane_offset - dihedral_offset / 2, -a / 2 - dihedral_offset / 2, -a / 2),
+                    'RBD': ((a - plane_offset) / 2 - dihedral_offset / 2, a / 2 - dihedral_offset / 2, -a / 2)
+                }
+            case 'LFDS':
+                vertices = {
+                    'LFD': (-a + plane_offset - dihedral_offset / 2, a / 2 - plane_offset, a / 2),
+                    'LFU': ((-a + plane_offset) / 2 - dihedral_offset / 2, -a / 2 - plane_offset, a / 2),
+                    'RFU': (a - plane_offset - dihedral_offset, -a / 2 + plane_offset, a / 2),
+                    'RFD': ((a - plane_offset) / 2 - dihedral_offset, a / 2 + plane_offset, a / 2),
+
+                    'LBD': (-a + plane_offset - dihedral_offset,
+                            a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
+                    'LBU': ((-a + plane_offset) / 2 - dihedral_offset,
+                            -a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBU': (a - plane_offset - 1.5 * dihedral_offset,
+                            -a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBD': ((a - plane_offset) / 2 - 1.5 * dihedral_offset,
+                            a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                }
+            case 'RFDN':
+                vertices = {
+                    'LFD': (-a + plane_offset - dihedral_offset / 2, a / 2 - plane_offset, a / 2),
+                    'LFU': ((-a + plane_offset) / 2 - dihedral_offset / 2, -a / 2 - plane_offset, a / 2),
+                    'RFU': (a - plane_offset - dihedral_offset, -a / 2 + plane_offset, a / 2),
+                    'RFD': ((a - plane_offset) / 2 - dihedral_offset, a / 2 + plane_offset, a / 2),
+
+                    'LBD': (-a + plane_offset - dihedral_offset,
+                            a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
+                    'LBU': ((-a + plane_offset) / 2 - dihedral_offset,
+                            -a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBU': (a - plane_offset - 1.5 * dihedral_offset,
+                            -a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBD': ((a - plane_offset) / 2 - 1.5 * dihedral_offset,
+                            a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                }
+
+            case _:
+                raise ValueError('Incorrect corner name')
 
         vertices = {key: Point(*vertex) for key, vertex in vertices.items()}
 
@@ -772,10 +806,15 @@ class MegaminxConfig:
         return vertices, edges
 
     def get_offset_corners(self):
-        offset = Config().size * (self.n - 1) / self.n
-        positions = {
-            'RFU': (0, 0, 0),
+        offset = Config().size * (self.n - 2) / self.n
+        plane_offset = offset / tan(radians(72))
+        dihedral_offset = offset / tan(acos(sqrt(5) / 5))
 
+        positions = {
+            'RFU': (offset, -offset, offset),
+            'LFU': (-offset, -offset, offset),
+            'LFDS': (-offset - dihedral_offset / 2, offset, offset),
+            'RFDN': (offset + dihedral_offset / 2, offset, offset)
         }
 
         # 'LFD': (-offset, offset, offset),
@@ -814,6 +853,18 @@ class MegaminxConfig:
         }
 
         return sides
+
+    def get_exchanges_centers(self):
+        exchanges_centers = {
+            'R': ['U', 'B', 'D', 'F'],
+            'L': ['U', 'F', 'D', 'B'],
+            'U': ['F', 'L', 'B', 'R'],
+            'D': ['F', 'R', 'B', 'L'],
+            'F': ['U', 'R', 'D', 'L'],
+            'B': ['U', 'L', 'D', 'R']
+        }
+
+        return exchanges_centers
     '''
     def get_center_data(self, name):
         match name:
