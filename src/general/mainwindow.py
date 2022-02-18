@@ -54,14 +54,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.models.currentTextChanged.connect(self.load_model)
         self.sizeModel.currentTextChanged.connect(self.load_model)
 
-        self.rotate_y_.clicked.connect(lambda: self.turn_model_oy(self.angle))
-        self.rotate_y.clicked.connect(lambda: self.turn_model_oy(-self.angle))
-        self.rotate_x.clicked.connect(lambda: self.turn_model_ox(self.angle))
-        self.rotate_x_.clicked.connect(lambda: self.turn_model_ox(-self.angle))
-        self.rotate_z.clicked.connect(lambda: self.turn_model_oz(self.angle))
-        self.rotate_z_.clicked.connect(lambda: self.turn_model_oz(-self.angle))
-        # TODO: кастомизировать кнопки поворота
-
         self.set_connects_to_buttons()
         self.change_turn_buttons_color()
 
@@ -79,6 +71,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def set_connects_to_buttons(self):
         self.mixButton.clicked.connect(self.mix_model)
+
+        self.rotate_y_.clicked.connect(lambda: self.turn_model_oy(self.angle))
+        self.rotate_y.clicked.connect(lambda: self.turn_model_oy(-self.angle))
+        self.rotate_x.clicked.connect(lambda: self.turn_model_ox(self.angle))
+        self.rotate_x_.clicked.connect(lambda: self.turn_model_ox(-self.angle))
+        self.rotate_z.clicked.connect(lambda: self.turn_model_oz(self.angle))
+        self.rotate_z_.clicked.connect(lambda: self.turn_model_oz(-self.angle))
+        # TODO: кастомизировать кнопки поворота
 
         self.right.clicked.connect(lambda: self.start_turning_side('R', 1))
         self.up.clicked.connect(lambda: self.start_turning_side('U', 1))
@@ -176,7 +176,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.model.scale(self.k / self.k_step)
         self.update()
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event: PyQt5.QtGui.QWheelEvent) -> None:
         if not self.model:
             return
 
@@ -190,23 +190,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.model.scale(self.k / self.k_step)
         self.update()
 
-    def turn_model_ox(self, angle):
+    def turn_model_ox(self, angle: int) -> None:
         self.model.turn_ox(angle)
         self.update()
 
-    def turn_model_oy(self, angle):
+    def turn_model_oy(self, angle: int) -> None:
         self.model.turn_oy(angle)
         self.update()
 
-    def turn_model_oz(self, angle):
+    def turn_model_oz(self, angle: int) -> None:
         self.model.turn_oz(angle)
         self.update()
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: PyQt5.QtGui.QMouseEvent) -> None:
         if self.x != event.x() or self.y != event.y():
             self.x, self.y = event.x(), event.y()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: PyQt5.QtGui.QMouseEvent) -> None:
         if self.duration != 0:
             return
 
@@ -225,11 +225,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.x, self.y = x1, y1
 
-    def set_turning_params(self, name, direction):
+    def set_turning_params(self, name: str, direction: int) -> None:
         self.turning_side = name
         self.turning_direction = direction
 
-    def start_turning_side(self, name, direction):
+    def start_turning_side(self, name: str, direction: int) -> None:
         if isinstance(self.model, Pyramid) and (name == 'B' or name == 'U'):
             return
 
@@ -240,7 +240,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.model.init_turning_centers(name)
             self.timer.start(0)
 
-    def turn_side(self):
+    def turn_side(self) -> None:
         self.duration += 1
         self.model.turn_side(self.turning_side, self.turning_direction)
 
@@ -253,28 +253,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.update()
 
-    def update_sides(self):
+    def update_sides(self) -> None:
         self.model.update_sides(self.turning_side, self.turning_direction)
 
-    def keyPressEvent(self, event):
-        if event.key() in self.turning_keys and self.duration == 0:
-            self.start_turning_side(*self.turning_keys[event.key()])
+    def keyPressEvent(self, event: PyQt5.QtGui.QKeyEvent) -> None:
+        key = PyQt5.QtCore.Qt.Key(event.key())
 
-    def add_light_source(self, point):
+        if key in self.turning_keys and self.duration == 0:
+            self.start_turning_side(*self.turning_keys[key])
+
+    def add_light_source(self, point: Point) -> None:
         self.model.add_light(point)
         self.update()
 
-    def delete_light_source(self, point):
+    def delete_light_source(self, point: Point) -> None:
         self.model.del_light(point)
         self.update()
 
-    def change_right_light(self):
+    def change_right_light(self) -> None:
         if self.right_light.isChecked():
             self.add_light_source(self.right_light_point)
         else:
             self.delete_light_source(self.right_light_point)
 
-    def change_left_light(self):
+    def change_left_light(self) -> None:
         if self.left_light.isChecked():
             self.add_light_source(self.left_light_point)
         else:
