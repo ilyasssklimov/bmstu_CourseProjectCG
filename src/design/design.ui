@@ -68,11 +68,6 @@
       <string>Пирамидка</string>
      </property>
     </item>
-    <item>
-     <property name="text">
-      <string>Мегаминкс</string>
-     </property>
-    </item>
    </widget>
    <widget class="QSlider" name="scaleSlider">
     <property name="geometry">

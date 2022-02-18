@@ -1,12 +1,13 @@
+import PyQt5.QtGui
 from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QColor, QRadialGradient, QBrush
 from PyQt5 import QtWidgets, QtCore
 
-from src.general.config import Config, get_colors, CUBE, PYRAMID, MEGAMINX, PyramidConfig
+from src.general.config import Config, get_colors, CUBE, PYRAMID, MEGAMINX
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
-from src.models.models import Cube, Pyramid, Megaminx
-from src.utils.mymath import sign, Vector, Angle
+from src.models.models import Cube, Pyramid
+from src.utils.mymath import sign
 from src.utils.point import Point
 
 
@@ -26,12 +27,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.gradient.setColorAt(1, QColor('grey'))
 
         self.model = None
-        self.k = 10
-        self.angle = 90
+        self.k_step = 80
+        self.k = self.k_step
+        self.angle = 10
         self.speed = 2
-        self.angle_to_turn = 120
+        self.angle_to_turn = 90
 
-        self.models.setCurrentText('Мегаминкс')
+        self.models.setCurrentText(CUBE)
         self.sizeModel.setCurrentText('3x3x3')
         self.load_model()
 
@@ -116,15 +118,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.back.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["B"]}')
         self.back_.setStyleSheet(f'border : 2px solid black;\nborder-radius : 8px;\nbackground-color : {colors["B"]}')
 
-    def load_model(self):
-        self.scaleSlider.setValue(10)
-        self.k = 10
+    def load_model(self) -> None:
+        self.scaleSlider.setValue(self.k_step)
+        self.k = self.k_step
         model = self.models.currentText()
         self.right_light.setCheckState(False)
         self.left_light.setCheckState(False)
 
-        size = int(self.sizeModel.currentText().split('x')[0])
         if model == CUBE:
+            size = int(self.sizeModel.currentText().split('x')[0])
             self.model = Cube(size)
             self.angle_to_turn = 90
 
@@ -132,7 +134,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model.turn_ox(-30)
 
             self.update()
+
         elif model == PYRAMID:
+            self.sizeModel.setCurrentText('3x3x3')
+            size = int(self.sizeModel.currentText().split('x')[0])
             self.model = Pyramid(size)
 
             self.angle_to_turn = 120
@@ -141,17 +146,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model.turn_ox(-30)
 
             self.update()
-        elif model == MEGAMINX:
-            self.model = Megaminx(size)
 
-            self.angle_to_turn = 108
-
-            self.update()
-
-    def mix_model(self):
+    def mix_model(self) -> None:
         print('Temporarily does\'not work :(')
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: PyQt5.QtGui.QPaintEvent) -> None:
         painter = QtDrawer()
         painter.begin(self)
 
@@ -164,14 +163,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.model.draw_turning(painter, self.turning_side, self.plastic_vertices)
 
-        # for key in self.model.centers.centers:
-        #     if key == 'R':
-        #         for center in self.model.centers.centers[key]:
-        #             painter.pcreate_line(self.model.centers.sides_centers['D'], center.get_center_by_name())
-
         painter.end()
 
-    def scale_model(self):
+    def scale_model(self) -> None:
         if not self.model or self.k == self.scaleSlider.value():
             return
 
@@ -179,7 +173,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.k < 1:
             self.k = 1
 
-        self.model.scale(self.k / 10)
+        self.model.scale(self.k / self.k_step)
         self.update()
 
     def wheelEvent(self, event):
@@ -193,7 +187,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.k = 100
 
         self.scaleSlider.setValue(int(self.k))
-        self.model.scale(self.k / 10)
+        self.model.scale(self.k / self.k_step)
         self.update()
 
     def turn_model_ox(self, angle):
@@ -247,10 +241,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.timer.start(0)
 
     def turn_side(self):
-        k = self.angle_to_turn
-        k = 1
-        self.duration += k
-        self.model.turn_side(self.turning_side, self.turning_direction * k)
+        self.duration += 1
+        self.model.turn_side(self.turning_side, self.turning_direction)
 
         if self.duration >= self.angle_to_turn:
             self.update_sides()
