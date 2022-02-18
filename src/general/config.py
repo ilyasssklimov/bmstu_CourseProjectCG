@@ -765,21 +765,36 @@ class MegaminxConfig:
                 }
             case 'RFDN':
                 vertices = {
-                    'LFD': (-a + plane_offset - dihedral_offset / 2, a / 2 - plane_offset, a / 2),
-                    'LFU': ((-a + plane_offset) / 2 - dihedral_offset / 2, -a / 2 - plane_offset, a / 2),
-                    'RFU': (a - plane_offset - dihedral_offset, -a / 2 + plane_offset, a / 2),
-                    'RFD': ((a - plane_offset) / 2 - dihedral_offset, a / 2 + plane_offset, a / 2),
+                    'LFD': ((-a + plane_offset) / 2 + dihedral_offset, a / 2 + plane_offset, a / 2),
+                    'LFU': (-a + plane_offset + dihedral_offset, -a / 2 + plane_offset, a / 2),
+                    'RFU': ((a - plane_offset) / 2 + dihedral_offset / 2, -a / 2 - plane_offset, a / 2),
+                    'RFD': (a - plane_offset + dihedral_offset / 2, a / 2 - plane_offset, a / 2),
 
-                    'LBD': (-a + plane_offset - dihedral_offset,
-                            a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
-                    'LBU': ((-a + plane_offset) / 2 - dihedral_offset,
-                            -a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
-                    'RBU': (a - plane_offset - 1.5 * dihedral_offset,
-                            -a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
-                    'RBD': ((a - plane_offset) / 2 - 1.5 * dihedral_offset,
+                    'LBD': ((-a + plane_offset) / 2 + 1.5 * dihedral_offset,
                             a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                    'LBU': (-a + plane_offset + 1.5 * dihedral_offset,
+                            -a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBU': ((a - plane_offset) / 2 + dihedral_offset,
+                            -a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBD': (a - plane_offset + dihedral_offset,
+                            a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
                 }
+            case 'F':  # 'LRF':
+                vertices = {
+                    'LFD': (0, a - dihedral_offset / 2, a / 2),
+                    'LFU': (-a / 2 - plane_offset, 0, a / 2),
+                    'RFU': (0, -a + dihedral_offset / 2, a / 2),
+                    'RFD': (a / 2 + plane_offset, 0, a / 2),
 
+                    'LBD': ((-a + plane_offset) / 2 + 1.5 * dihedral_offset,
+                            a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                    'LBU': (-a + plane_offset + 1.5 * dihedral_offset,
+                            -a / 2 + plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBU': ((a - plane_offset) / 2 + dihedral_offset,
+                            -a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
+                    'RBD': (a - plane_offset + dihedral_offset,
+                            a / 2 - plane_offset - dihedral_offset / 2, -a / 2),
+                }
             case _:
                 raise ValueError('Incorrect corner name')
 
@@ -814,7 +829,8 @@ class MegaminxConfig:
             'RFU': (offset, -offset, offset),
             'LFU': (-offset, -offset, offset),
             'LFDS': (-offset - dihedral_offset / 2, offset, offset),
-            'RFDN': (offset + dihedral_offset / 2, offset, offset)
+            'RFDN': (offset + dihedral_offset / 2, offset, offset),
+            'F': (0, 2 * offset + dihedral_offset / 2, offset)
         }
 
         # 'LFD': (-offset, offset, offset),
