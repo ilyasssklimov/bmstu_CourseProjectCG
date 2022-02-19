@@ -5,12 +5,10 @@
 - Config
 - CubeConfig
 - PyramidConfig
-- MegaminxConfig
 
 - Model
 - Cube
 - Pyramid
-- Megaminx
 
 - Detail
 - Corner
@@ -36,4 +34,4 @@
 
 3) Сравнение по времени работы:
 - кубик на разных длинах
-- все три головомки с размерностью 3
+- две головомки с размерностью 3
