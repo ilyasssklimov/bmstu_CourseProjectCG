@@ -2,6 +2,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QBrush, QPen
 import src.general.config as config
 from copy import deepcopy, copy
+
+from src.design.drawer import QtDrawer
+from src.utils.edge import Edge
 from src.utils.point import divide_line_by_num
 from src.utils.matrix import MatrixPlane
 from src.utils.mymath import find_by_key, get_vertices_by_pairs, replace_list, reverse_replace_list, get_plane_cosine
@@ -10,7 +13,8 @@ from src.utils.point import Point
 
 
 class Detail:
-    def __init__(self, vertices, edges, offset, name, model_name, eccentric=True):
+    def __init__(self, vertices: dict[str, Point], edges: dict[str, Edge] | list[Edge],
+                 offset: Point, name: str, model_name: str, eccentric: bool = True):
         if model_name == config.CUBE:
             self.cfg = config.CubeConfig()
         elif model_name == config.PYRAMID:
@@ -32,8 +36,6 @@ class Detail:
         self.move(offset)
         self.move(config.Config().center)
 
-        self.offset = offset
-
     def __str__(self):
         result = 'Detail\n[\n'
         for vertex in self.vertices:
@@ -41,43 +43,43 @@ class Detail:
         result += ']\n'
         return result
 
-    def turn_ox(self, angle):
+    def turn_ox(self, angle: float) -> None:
         for vertex in self.vertices.values():
             vertex.turn_ox(angle)
 
-    def turn_oy(self, angle):
+    def turn_oy(self, angle: float) -> None:
         for vertex in self.vertices.values():
             vertex.turn_oy(angle)
 
-    def turn_oz(self, angle):
+    def turn_oz(self, angle: float) -> None:
         for vertex in self.vertices.values():
             vertex.turn_oz(angle)
 
-    def move(self, offset):
+    def move(self, offset: Point) -> None:
         for vertex in self.vertices.values():
             vertex.move(offset)
 
-    def scale(self, k, point):
+    def scale(self, k: float, point: Point) -> None:
         for vertex in self.vertices.values():
             vertex.scale(k, point)
 
-    def turn_ox_funcs(self, sin_angle, cos_angle):
+    def turn_ox_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for vertex in self.vertices.values():
             vertex.turn_ox_funcs(sin_angle, cos_angle)
 
-    def turn_oy_funcs(self, sin_angle, cos_angle):
+    def turn_oy_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for vertex in self.vertices.values():
             vertex.turn_oy_funcs(sin_angle, cos_angle)
 
-    def turn_oz_funcs(self, sin_angle, cos_angle):
+    def turn_oz_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for vertex in self.vertices.values():
             vertex.turn_oz_funcs(sin_angle, cos_angle)
 
-    def set_name(self, name):
+    def set_name(self, name: str) -> None:
         self.prev_name = self.name
         self.name = list(name)
 
-    def update_sides(self, side, direction):
+    def update_sides(self, side: str, direction: int) -> None:
         exchange = self.cfg.get_exchanges_centers()[side]
 
         dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
@@ -100,17 +102,18 @@ class Detail:
         elif len(self.name) == 3:
             self.name = reverse_replace_list(self.prev_name, old_letter, new_letter, side)
 
-    def fill_shadow_detail(self, painter, vertices, color_side, shadow):
+    def fill_shadow_detail(self, painter: QtDrawer, vertices: list[Point] | None,
+                           color_side: str | None, shadow: float | None) -> None:
         color = (int(color * shadow) for color in self.colors[color_side])
         painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
         painter.fill(vertices)
 
-    def fill_detail(self, painter, vertices, color_side):
+    def fill_detail(self, painter: QtDrawer, vertices: list[Point] | None, color_side: str | None) -> None:
         color = self.colors[color_side]
         painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
         painter.fill(vertices)
 
-    def draw(self, painter, visible_sides, shadows=None):
+    def draw(self, painter: QtDrawer, visible_sides: list[str], shadows: dict[str, float] | None = None) -> None:
         for side in visible_sides:
             if side in self.name:
                 vertices_pairs = []
@@ -127,7 +130,8 @@ class Detail:
                 else:
                     self.fill_shadow_detail(painter, vertices, color_side, shadows[side])
 
-    def draw_turning(self, painter, visible_sides, turning_side, model_center=None, light_sources=None):
+    def draw_turning(self, painter: QtDrawer, visible_sides: list[str], turning_side: str,
+                     model_center: list[int] | None = None, light_sources: list[Point] | None = None) -> None:
         stickers_centers = {}
         sides_vertices = {}
         for side in self.sides:
@@ -160,13 +164,13 @@ class Detail:
             if self.model_name == config.CUBE:
                 self.fill_detail(painter, sides_vertices[opposite_side], 'black')
 
-    def get_center_z(self):
+    def get_center_z(self) -> float:
         center = 0
         for vertex in self.vertices.values():
             center += vertex.z
         return center / len(self.vertices)
 
-    def get_center_by_name(self, vertices=None):
+    def get_center(self, vertices: dict[str, Point] | None = None) -> Point | None:
         if not vertices:
             return None
 
@@ -177,18 +181,19 @@ class Detail:
 
         return center / len(vertices)
 
-    def get_vertex_by_name(self, name):
+    def get_vertex_by_name(self, name: str) -> Point | None:
         set_name = set(name)
         for key in self.vertices:
             if set(key) == set_name:
                 return self.vertices[key]
         return None
 
-    def get_shadow(self, name, model_center, light_sources, vertices=None):
+    def get_shadow(self, name: str, model_center: list[int], light_sources: list[Point],
+                   vertices: list[Point] | None = None) -> float | None:
         if not light_sources or not vertices:
             return None
 
-        center = self.get_center_by_name(vertices)
+        center = self.get_center(vertices)
 
         if self.model_name == config.CUBE:
             plane_points = [vertices[0], *vertices[2:-1]]
@@ -209,57 +214,54 @@ class Detail:
         else:
             return 1
 
-    def get_side_center(self, name):
-        center = Point()
-
-        for key in self.vertices:
-            if name in key:
-                center += self.vertices[key]
-
-        return center / 3
-
-    def get_vertices_by_edge(self, edge):
+    def get_vertices_by_edge(self, edge: str) -> tuple[Point, Point]:
         return self.edges[edge].get_points(self.vertices)
 
 
 class Corner(Detail):
-    def __init__(self, vertices, edges, offset, name, model_name):
+    def __init__(self, vertices: dict[str, Point], edges: dict[str, Edge] | list[Edge],
+                 offset: Point, name: str, model_name: str):
         super().__init__(vertices, edges, offset, name, model_name)
 
 
 class Rib(Detail):
-    def __init__(self, vertices, edges, offset, name, model_name):
+    def __init__(self, vertices: dict[str, Point], edges: dict[str, Edge] | list[Edge],
+                 offset: Point, name: str, model_name: str):
         super().__init__(vertices, edges, offset, name, model_name)
 
 
 class Center(Detail):
-    def __init__(self, vertices, edges, offset, name, model_name):
+    def __init__(self, vertices: dict[str, Point], edges: dict[str, Edge] | list[Edge],
+                 offset: Point, name: str, model_name: str):
         super().__init__(vertices, edges, offset, name, model_name, False)
         self.color = self.colors[name]
 
-    def fill_shadow_detail(self, painter, vertices=None, color_side=None, shadow=None):
+    def fill_shadow_detail(self, painter: QtDrawer, vertices: list[Point] | None = None,
+                           color_side: str | None = None, shadow: float | None = None) -> None:
         color = (int(color * shadow) for color in self.color)
         painter.setBrush(QBrush(QColor(*color), Qt.SolidPattern))
         painter.fill(self.vertices.values())
 
-    def fill_detail(self, painter, vertices=None, color_side=None):
+    def fill_detail(self, painter: QtDrawer, vertices: list[Point] | None = None,
+                    color_side: str | None = None) -> None:
         painter.setBrush(QBrush(QColor(*self.color), Qt.SolidPattern))
         painter.fill(self.vertices.values())
 
-    def draw(self, painter, visible_sides, shadows=None):
+    def draw(self, painter: QtDrawer, visible_sides: list[str], shadows: dict[str, float] | None = None) -> None:
         if not shadows:
             self.fill_detail(painter)
         else:
             self.fill_shadow_detail(painter, None, None, shadows[self.name[0]])
 
-    def draw_turning(self, painter, visible_sides, turning_side, model_center=None, light_sources=None):
+    def draw_turning(self, painter: QtDrawer, visible_sides: list[str], turning_side: str,
+                     model_center: list[int] | None = None, light_sources: list[Point] | None = None) -> None:
         if not light_sources:
             self.fill_detail(painter)
         else:
             shadow = self.get_shadow(self.name[0], model_center, light_sources)
             self.fill_shadow_detail(painter, None, None, shadow)
 
-    def get_center_by_name(self, vertices=None):
+    def get_center(self, vertices: dict[str, Point] | None = None) -> Point | None:
         center = Point()
 
         for vertex in self.vertices:
@@ -267,11 +269,12 @@ class Center(Detail):
 
         return center / len(self.vertices)
 
-    def get_shadow(self, name, model_center, light_sources, vertices=None):
+    def get_shadow(self, name: str, model_center: list[int], light_sources: list[Point],
+                   vertices: list[Point] | None = None) -> float | None:
         if not light_sources:
             return None
 
-        center = self.get_center_by_name()
+        center = self.get_center()
 
         vertices = list(self.vertices.values())
 
@@ -296,7 +299,7 @@ class Center(Detail):
 
 
 class Corners:
-    def __init__(self, n, model_name):
+    def __init__(self, n: int, model_name: str):
         if model_name == config.CUBE:
             self.cfg = config.CubeConfig(n)
         elif model_name == config.PYRAMID:
@@ -314,22 +317,23 @@ class Corners:
         for key, value in positions.items():
             self.corners[key] = Corner(deepcopy(vertices), edges, Point(*value), key, model_name)
 
-    def init_extra_points(self):
+    def init_extra_points(self) -> None:
         self.carcass = self.cfg.get_carcass()
         for key in self.carcass:
             self.carcass[key].move(config.Config().center)
 
-    def draw(self, painter, visible_sides, shadows=None):
+    def draw(self, painter: QtDrawer, visible_sides: list[str], shadows: dict[str, float] | None = None) -> None:
         for key in self.corners:
             if set(visible_sides) & set(key):
                 self.corners[key].draw(painter, visible_sides, shadows)
 
-    def draw_below_turning(self, painter, visible_sides, side, shadows=None):
+    def draw_below_turning(self, painter: QtDrawer, visible_sides: list[str], side: str,
+                           shadows: dict[str, float] | None = None) -> None:
         for key in self.corners:
             if set(visible_sides) & set(key) and side not in key:
                 self.corners[key].draw(painter, visible_sides, shadows)
 
-    def get_static_plastic_part(self, side, n):
+    def get_static_plastic_part(self, side: str, n: int) -> list[Point]:
         def get_carcass_vertices(src_vertices):
             vertices = []
             for vertex in src_vertices:
@@ -355,7 +359,7 @@ class Corners:
 
         return plastic_vertices
 
-    def get_static_pyramid_plastic(self, side, copied=True):
+    def get_static_pyramid_plastic(self, side: str, copied: bool = True) -> list[Point]:
         vertices = self.cfg.get_plastic_vertices()[side][0]
         general = self.cfg.get_plastic_vertices()[side][1]
         plastic_vertices = []
@@ -380,7 +384,7 @@ class Corners:
 
         return plastic_vertices
 
-    def get_centers(self, side):
+    def get_centers(self, side: str) -> dict[Corner, float]:
         corners_centers = {}
         for key in self.corners:
             if side in key:
@@ -388,54 +392,54 @@ class Corners:
 
         return corners_centers
 
-    def move(self, point):
+    def move(self, point: Point) -> None:
         for key in self.corners:
             self.corners[key].move(point)
         for key in self.carcass:
             self.carcass[key].move(point)
 
-    def turn_ox(self, angle):
+    def turn_ox(self, angle: float) -> None:
         for key in self.corners:
             self.corners[key].turn_ox(angle)
         for key in self.carcass:
             self.carcass[key].turn_ox(angle)
 
-    def turn_oy(self, angle):
+    def turn_oy(self, angle: float) -> None:
         for key in self.corners:
             self.corners[key].turn_oy(angle)
         for key in self.carcass:
             self.carcass[key].turn_oy(angle)
 
-    def turn_oz(self, angle):
+    def turn_oz(self, angle: float) -> None:
         for key in self.corners:
             self.corners[key].turn_oz(angle)
         for key in self.carcass:
             self.carcass[key].turn_oz(angle)
 
-    def scale(self, k, point):
+    def scale(self, k: float, point: Point) -> None:
         for key in self.corners:
             self.corners[key].scale(k, point)
         for key in self.carcass:
             self.carcass[key].scale(k, point)
 
-    def turn_ox_funcs(self, sin_angle, cos_angle):
+    def turn_ox_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.corners:
             self.corners[key].turn_ox_funcs(sin_angle, cos_angle)
 
-    def turn_oy_funcs(self, sin_angle, cos_angle):
+    def turn_oy_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.corners:
             self.corners[key].turn_oy_funcs(sin_angle, cos_angle)
 
-    def turn_oz_funcs(self, sin_angle, cos_angle):
+    def turn_oz_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.corners:
             self.corners[key].turn_oz_funcs(sin_angle, cos_angle)
 
-    def turn_side_oy(self, name, angle):
+    def turn_side_oy(self, name: str, angle: float) -> None:
         for key in self.corners:
             if name in key:
                 self.corners[key].turn_oy(angle)
 
-    def update_sides(self, side, direction):
+    def update_sides(self, side: str, direction: int) -> None:
         exchange = self.cfg.get_exchanges_corners()[side]
 
         dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
@@ -456,7 +460,7 @@ class Corners:
             if side in key:
                 self.corners[key].update_sides(side, direction)
 
-    def create_plane_points(self):
+    def create_plane_points(self) -> dict[str, list[Point]]:
         sides = self.cfg.get_sides()
         points = {}
 
@@ -467,7 +471,7 @@ class Corners:
 
 
 class Ribs:
-    def __init__(self, n, model_name):
+    def __init__(self, n: int, model_name: str):
         if model_name == config.CUBE:
             self.cfg = config.CubeConfig(n)
         elif model_name == config.PYRAMID:
@@ -484,19 +488,20 @@ class Ribs:
                 for position in positions[key]:
                     self.ribs[key].append(Rib(deepcopy(vertices), edges, Point(*position), key, model_name))
 
-    def draw(self, painter, visible_sides, shadows=None):
+    def draw(self, painter: QtDrawer, visible_sides: list[str], shadows: dict[str, float] | None = None) -> None:
         for key in self.ribs:
             if set(visible_sides) & set(key):
                 for rib in self.ribs[key]:
                     rib.draw(painter, visible_sides, shadows)
 
-    def draw_below_turning(self, painter, visible_sides, side, shadows=None):
+    def draw_below_turning(self, painter: QtDrawer, visible_sides: list[str], side: str,
+                           shadows: dict[str, float] | None = None) -> None:
         for key in self.ribs:
             if set(visible_sides) & set(key) and side not in key:
                 for rib in self.ribs[key]:
                     rib.draw(painter, visible_sides, shadows)
 
-    def get_centers(self, side):
+    def get_centers(self, side: str) -> dict[Rib, float]:
         ribs_centers = {}
         for key in self.ribs:
             if side in key:
@@ -505,53 +510,53 @@ class Ribs:
 
         return ribs_centers
 
-    def move(self, point):
+    def move(self, point: Point) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.move(point)
 
-    def turn_ox(self, angle):
+    def turn_ox(self, angle: float) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.turn_ox(angle)
 
-    def turn_oy(self, angle):
+    def turn_oy(self, angle: float) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.turn_oy(angle)
 
-    def turn_oz(self, angle):
+    def turn_oz(self, angle: float) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.turn_oz(angle)
 
-    def scale(self, k, point):
+    def scale(self, k: float, point: Point) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.scale(k, point)
 
-    def turn_ox_funcs(self, sin_angle, cos_angle):
+    def turn_ox_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.turn_ox_funcs(sin_angle, cos_angle)
 
-    def turn_oy_funcs(self, sin_angle, cos_angle):
+    def turn_oy_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.turn_oy_funcs(sin_angle, cos_angle)
 
-    def turn_oz_funcs(self, sin_angle, cos_angle):
+    def turn_oz_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.ribs:
             for rib in self.ribs[key]:
                 rib.turn_oz_funcs(sin_angle, cos_angle)
 
-    def turn_side_oy(self, name, angle):
+    def turn_side_oy(self, name: str, angle: float) -> None:
         for key in self.ribs:
             if name in key:
                 for rib in self.ribs[key]:
                     rib.turn_oy(angle)
 
-    def update_sides(self, side, direction):
+    def update_sides(self, side: str, direction: int) -> None:
         exchange = self.cfg.get_exchanges_ribs()[side]
 
         dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
@@ -576,7 +581,7 @@ class Ribs:
 
 
 class Centers:
-    def __init__(self, n, model_name):
+    def __init__(self, n: int, model_name: str):
         if model_name == config.CUBE:
             self.cfg = config.CubeConfig(n)
         elif model_name == config.PYRAMID:
@@ -600,12 +605,12 @@ class Centers:
                 for position in positions[key]:
                     self.centers[key].append(Center(deepcopy(vertices), edges, Point(*position), key, model_name))
 
-    def init_sides_centers(self):
+    def init_sides_centers(self) -> None:
         self.sides_centers = self.cfg.get_sides_centers()
         for key in self.sides_centers:
             self.sides_centers[key].move(config.Config().center)
 
-    def draw(self, painter, visible_sides, shadows=None):
+    def draw(self, painter: QtDrawer, visible_sides: list[str], shadows: dict[str, float] | None = None) -> None:
         if self.n == 2:
             return
 
@@ -616,7 +621,8 @@ class Centers:
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
-    def draw_below_turning(self, painter, visible_sides, centers, shadows=None):
+    def draw_below_turning(self, painter: QtDrawer, visible_sides: list[str], centers: dict[str, list[Center]],
+                           shadows: dict[str, float] | None = None) -> None:
         if self.n == 2:
             return
 
@@ -628,7 +634,7 @@ class Centers:
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
 
-    def get_center(self, side):
+    def get_centers(self, side: str) -> dict[Center, float]:
         if self.n == 2:
             return {}
 
@@ -638,57 +644,57 @@ class Centers:
 
         return center_centers
 
-    def move(self, point):
+    def move(self, point: Point) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.move(point)
         for key in self.sides_centers:
             self.sides_centers[key].move(point)
 
-    def turn_ox(self, angle):
+    def turn_ox(self, angle: float) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_ox(angle)
         for key in self.sides_centers:
             self.sides_centers[key].turn_ox(angle)
 
-    def turn_oy(self, angle):
+    def turn_oy(self, angle: float) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oy(angle)
         for key in self.sides_centers:
             self.sides_centers[key].turn_oy(angle)
 
-    def turn_oz(self, angle):
+    def turn_oz(self, angle: float) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oz(angle)
         for key in self.sides_centers:
             self.sides_centers[key].turn_oz(angle)
 
-    def scale(self, k, point):
+    def scale(self, k: float, point: Point) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.scale(k, point)
         for key in self.sides_centers:
             self.sides_centers[key].scale(k, point)
 
-    def turn_ox_funcs(self, sin_angle, cos_angle):
+    def turn_ox_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_ox_funcs(sin_angle, cos_angle)
 
-    def turn_oy_funcs(self, sin_angle, cos_angle):
+    def turn_oy_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oy_funcs(sin_angle, cos_angle)
 
-    def turn_oz_funcs(self, sin_angle, cos_angle):
+    def turn_oz_funcs(self, sin_angle: float, cos_angle: float) -> None:
         for key in self.centers:
             for center in self.centers[key]:
                 center.turn_oz_funcs(sin_angle, cos_angle)
 
-    def turn_side_oy(self, name, angle, centers=None):
+    def turn_side_oy(self, name: str, angle: float, centers: dict[str, list[Center]] | None = None) -> None:
         for key in self.centers:
             if name in key:
                 for center in self.centers[key]:
@@ -699,7 +705,8 @@ class Centers:
                 for center in centers[key]:
                     center.turn_oy(angle)
 
-    def update_sides(self, side, direction, centers, extra):
+    def update_sides(self, side: str, direction: int, centers: dict[str, list[Center]],
+                     extra: dict[str, list[Center]]) -> None:
         exchange = self.cfg.get_exchanges_centers()[side]
 
         dir_range = range(len(exchange) - 2, -1, -1) if direction > 0 else range(1, len(exchange))
@@ -720,14 +727,14 @@ class Centers:
         for key in centers:
             self.centers[key] = centers[key] + extra[key]
 
-    def get_turning_centers(self, name):
+    def get_turning_centers(self, name: str) -> tuple[dict[str, list[Center]], dict[str, list[Center]]]:
         centers = dict()
         extra = dict()
 
         side_center = self.sides_centers[name]
         for key in self.centers:
             if name not in key:
-                distances = [(round(side_center.get_dist_to_point(center.get_center_by_name())), center)
+                distances = [(round(side_center.get_dist_to_point(center.get_center())), center)
                              for center in self.centers[key]]
                 distances.sort(key=lambda x: x[0])
 

@@ -1,3 +1,5 @@
+from typing import ValuesView
+
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QPainter, QPolygon
 from src.utils.point import Point
@@ -16,6 +18,6 @@ class QtDrawer(QPainter):
     def pset_pixel(self, point: Point) -> None:
         self.drawPoint(int(point.x), int(point.y))
 
-    def fill(self, vertices: list[Point]) -> None:
+    def fill(self, vertices: list[Point] | ValuesView[Point]) -> None:
         points = QPolygon([QPoint(int(vertex.x), int(vertex.y)) for vertex in vertices])
         self.drawPolygon(points)

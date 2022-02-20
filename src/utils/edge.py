@@ -1,5 +1,8 @@
+from src.utils.point import Point
+
+
 class Edge:
-    def __init__(self, first, second):
+    def __init__(self, first: str, second: str):
         self.first = first
         self.second = second
 
@@ -9,7 +12,7 @@ class Edge:
     def __repr__(self):
         return str(self)
 
-    def get_points(self, vertices):
+    def get_points(self, vertices: dict[str, Point]) -> tuple[Point, Point]:
         return vertices[self.first], vertices[self.second]
 
     def __contains__(self, item):

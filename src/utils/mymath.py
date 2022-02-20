@@ -4,7 +4,7 @@ from math import pi, sin, cos, sqrt
 
 
 class Vector:
-    def __init__(self, start, finish=None):
+    def __init__(self, start: list | p.Point, finish: p.Point | None = None):
         if finish:
             self.x = finish.x - start.x
             self.y = finish.y - start.y
@@ -32,28 +32,28 @@ class Vector:
         self.z = -self.z
         return self
 
-    def negative(self):
+    def negative(self) -> None:
         self.x = -self.x
         self.y = -self.y
         self.z = -self.z
 
-    def get_vector(self):
+    def get_vector(self) -> list[float]:
         return [self.x, self.y, self.z]
 
-    def normalize(self):
+    def normalize(self) -> None:
         d = sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
         if d != 0:
             self.x /= d
             self.y /= d
             self.z /= d
 
-    def get_length_xy(self):
+    def get_length_xy(self) -> float:
         return sqrt(self.x ** 2 + self.y ** 2)
 
-    def get_length(self):
+    def get_length(self) -> float:
         return sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
-    def adjust(self, point_1, point_2):
+    def adjust(self, point_1: p.Point, point_2: p.Point) -> None:
         vector = Vector(point_1, point_2)
         scalar = scalar_multiplication(self, vector)
         cosine = scalar / (self.get_length() * vector.get_length())
@@ -71,13 +71,13 @@ class Angle:
         self.sin = 0
         self.cos = 1
 
-    def set_angle(self, angle):
+    def set_angle(self, angle: float) -> None:
         self.angle = angle
 
-    def set_sin(self, sin_angle):
+    def set_sin(self, sin_angle: float) -> None:
         self.sin = sin_angle
 
-    def set_cos(self, cos_angle):
+    def set_cos(self, cos_angle: float) -> None:
         self.cos = cos_angle
 
 

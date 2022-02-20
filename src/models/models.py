@@ -1,16 +1,15 @@
-from math import sqrt
-
-from src.general.config import Config, CubeConfig, PyramidConfig, EPS, CUBE, PYRAMID, MEGAMINX
+from src.design.drawer import QtDrawer
+from src.general.config import Config, CubeConfig, PyramidConfig, EPS, CUBE, PYRAMID
 from src.models.details import Corners, Ribs, Centers
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QBrush, QColor
 from src.utils.point import Point
 from src.utils.matrix import MatrixPlane, MatrixBody
-from src.utils.mymath import Vector, Angle, get_plane_cosine, sin_deg, cos_deg
+from src.utils.mymath import Vector, Angle, get_plane_cosine
 
 
 class Model:
-    def __init__(self, corners, ribs, centers, n, model_name):
+    def __init__(self, corners: Corners, ribs: Ribs, centers: Centers, n: int, model_name: str):
         self.n = n
         self.corners = corners
         self.ribs = ribs
@@ -38,7 +37,7 @@ class Model:
         self.visible_sides = []
         self.set_visible_sides()
 
-    def draw(self, painter):
+    def draw(self, painter: QtDrawer) -> None:
         pen = QPen(Qt.black, 6)
         painter.setPen(pen)
         shadows = None if not self.light_sources else self.count_shadows()
@@ -47,7 +46,7 @@ class Model:
         self.ribs.draw(painter, self.visible_sides, shadows)
         self.centers.draw(painter, self.visible_sides, shadows)
 
-    def draw_turning(self, painter, side, plastic_part):
+    def draw_turning(self, painter: QtDrawer, side: str, plastic_part: list[Point]) -> None:
         def draw_below_turning(shadows_=None):
             self.ribs.draw_below_turning(painter, self.visible_sides, side, shadows_)
             self.centers.draw(painter, self.visible_sides, shadows_)
@@ -69,27 +68,28 @@ class Model:
             self.artist(painter, side)
             draw_below_turning(shadows)
 
-    def artist(self, painter, side):
+    def artist(self, painter: QtDrawer, side: str) -> None:
         corners = self.corners.get_centers(side)
         ribs = self.ribs.get_centers(side)
-        centers = self.centers.get_center(side)
+        centers = self.centers.get_centers(side)
+
         eccentric = corners | ribs | centers
         details = sorted(eccentric, key=eccentric.get)
 
         for detail in details:
             detail.draw_turning(painter, self.visible_sides, side, self.matrix_center[:-1], self.light_sources)
 
-    def get_static_plastic_part(self, side):
+    def get_static_plastic_part(self, side: str) -> list[Point]:
         return self.corners.get_static_plastic_part(side, self.n)
 
-    def count_shadows(self):
+    def count_shadows(self) -> dict[str, float | None]:
         shadows = {}
         for side in self.visible_sides:
             shadows[side] = self.get_shadow(side)
 
         return shadows
 
-    def get_shadow(self, position_side):
+    def get_shadow(self, position_side: str) -> float | None:
         if not self.light_sources:
             return None
 
@@ -109,7 +109,7 @@ class Model:
         else:
             return 1
 
-    def scale(self, k):
+    def scale(self, k: float) -> None:
         k = k if k else 1
         tmp = k / self.k
 
@@ -119,12 +119,12 @@ class Model:
 
         self.k = k
 
-    def move(self, point):
+    def move(self, point: Point) -> None:
         self.corners.move(point)
         self.ribs.move(point)
         self.centers.move(point)
 
-    def turn_ox(self, angle):
+    def turn_ox(self, angle: int | float) -> None:
         self.move(-self.center_point)
 
         self.corners.turn_ox(angle)
@@ -135,7 +135,7 @@ class Model:
 
         self.set_visible_sides()
 
-    def turn_oy(self, angle):
+    def turn_oy(self, angle: int | float) -> None:
         self.move(-self.center_point)
 
         self.corners.turn_oy(angle)
@@ -146,7 +146,7 @@ class Model:
 
         self.set_visible_sides()
 
-    def turn_oz(self, angle):
+    def turn_oz(self, angle: int | float) -> None:
         self.move(-self.center_point)
 
         self.corners.turn_oz(angle)
@@ -157,22 +157,22 @@ class Model:
 
         self.set_visible_sides()
 
-    def turn_ox_funcs(self, sin_angle, cos_angle):
+    def turn_ox_funcs(self, sin_angle: float, cos_angle: float) -> None:
         self.corners.turn_ox_funcs(sin_angle, cos_angle)
         self.ribs.turn_ox_funcs(sin_angle, cos_angle)
         self.centers.turn_ox_funcs(sin_angle, cos_angle)
 
-    def turn_oy_funcs(self, sin_angle, cos_angle):
+    def turn_oy_funcs(self, sin_angle: float, cos_angle: float) -> None:
         self.corners.turn_oy_funcs(sin_angle, cos_angle)
         self.ribs.turn_oy_funcs(sin_angle, cos_angle)
         self.centers.turn_oy_funcs(sin_angle, cos_angle)
 
-    def turn_oz_funcs(self, sin_angle, cos_angle):
+    def turn_oz_funcs(self, sin_angle: float, cos_angle: float) -> None:
         self.corners.turn_oz_funcs(sin_angle, cos_angle)
         self.ribs.turn_oz_funcs(sin_angle, cos_angle)
         self.centers.turn_oz_funcs(sin_angle, cos_angle)
 
-    def turn_side_elements(self, name, angle, alpha, beta):
+    def turn_side_elements(self, name: str, angle: float, alpha: Angle, beta: Angle):
         self.turn_oz_funcs(alpha.sin, alpha.cos)
         self.turn_ox_funcs(beta.sin, beta.cos)
 
@@ -183,7 +183,7 @@ class Model:
         self.turn_ox_funcs(-beta.sin, beta.cos)
         self.turn_oz_funcs(-alpha.sin, alpha.cos)
 
-    def turn_side(self, name, angle):
+    def turn_side(self, name: str, angle: float) -> None:
         self.move(-self.center_point)
 
         direction_vector = Vector(self.centers.sides_centers[name])
@@ -205,12 +205,12 @@ class Model:
 
         self.move(self.center_point)
 
-    def update_sides(self, side, direction):
+    def update_sides(self, side: str, direction: int) -> None:
         self.corners.update_sides(side, direction)
         if self.n > 2:
             self.ribs.update_sides(side, direction)
 
-    def set_matrix_body(self):
+    def set_matrix_body(self) -> None:
         sides = self.corners.create_plane_points()
         coefficients = {}
 
@@ -221,22 +221,22 @@ class Model:
         self.matrix_body = MatrixBody(coefficients)
         self.matrix_body.adjust(self.matrix_center)
 
-    def set_visible_sides(self):
+    def set_visible_sides(self) -> None:
         self.set_matrix_body()
         sides = self.matrix_body.sides
 
         visible_res = self.matrix_body.multiplication_vector(self.viewer)
         self.visible_sides = [side for side, value in zip(sides, visible_res) if value > EPS]
 
-    def add_light(self, point):
+    def add_light(self, point: Point) -> None:
         self.light_sources.append(point)
 
-    def del_light(self, point):
+    def del_light(self, point: Point) -> None:
         self.light_sources.remove(point)
 
 
 class Cube(Model):
-    def __init__(self, n):
+    def __init__(self, n: int):
         corners = Corners(n, CUBE)
         ribs = Ribs(n, CUBE)
         centers = Centers(n, CUBE)
@@ -245,7 +245,7 @@ class Cube(Model):
 
 
 class Pyramid(Model):
-    def __init__(self, n):
+    def __init__(self, n: int):
         corners = Corners(n, PYRAMID)
         ribs = Ribs(n, PYRAMID)
         centers = Centers(n, PYRAMID)
@@ -281,19 +281,19 @@ class Pyramid(Model):
         self.move(offset)
         self.move(self.center_point)
 
-    def init_turning_centers(self, name):
+    def init_turning_centers(self, name: str) -> None:
         self.turning_centers, self.extra = self.centers.get_turning_centers(name)
 
-    def uninit_turning_centers(self):
+    def uninit_turning_centers(self) -> None:
         self.turning_centers = None
         self.extra = None
 
-    def update_sides(self, side, direction):
+    def update_sides(self, side: str, direction: int) -> None:
         self.corners.update_sides(side, direction)
         self.ribs.update_sides(side, direction)
         self.centers.update_sides(side, direction, self.turning_centers, self.extra)
 
-    def turn_side_elements(self, name, angle, alpha, beta):
+    def turn_side_elements(self, name: str, angle: float, alpha: Angle, beta: Angle) -> None:
         self.turn_oz_funcs(alpha.sin, alpha.cos)
         self.turn_ox_funcs(beta.sin, beta.cos)
 
@@ -304,7 +304,7 @@ class Pyramid(Model):
         self.turn_ox_funcs(-beta.sin, beta.cos)
         self.turn_oz_funcs(-alpha.sin, alpha.cos)
 
-    def draw_turning(self, painter, side, plastic_part):
+    def draw_turning(self, painter: QtDrawer, side: str, plastic_part: list[Point]) -> None:
         def draw_below_turning(shadows_=None):
             self.ribs.draw_below_turning(painter, self.visible_sides, side, shadows_)
             self.centers.draw_below_turning(painter, self.visible_sides, self.extra, shadows_)
@@ -331,10 +331,10 @@ class Pyramid(Model):
             draw_dynamic_plastic_part()
             draw_below_turning(shadows)
 
-    def artist(self, painter, side):
+    def artist(self, painter: QtDrawer, side: str) -> None:
         corners = self.corners.get_centers(side)
         ribs = self.ribs.get_centers(side)
-        centers = self.centers.get_center(side)
+        centers = self.centers.get_centers(side)
         eccentric = corners | ribs | centers
 
         turning_centers = {}
@@ -348,5 +348,5 @@ class Pyramid(Model):
         for detail in details:
             detail.draw_turning(painter, self.visible_sides, side, self.matrix_center[:-1], self.light_sources)
 
-    def get_static_plastic_part(self, side):
+    def get_static_plastic_part(self, side: str) -> list[Point]:
         return self.corners.get_static_pyramid_plastic(side)
