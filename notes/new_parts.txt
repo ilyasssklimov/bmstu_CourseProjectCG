@@ -1,30 +1,29 @@
 1) Диаграммы классов:
-- MainWindow
-- QtDrawer
+- MainWindow            +
+- QtDrawer              +
 
-- Config
-- CubeConfig
-- PyramidConfig
+- Config                +
+- CubeConfig            +
+- PyramidConfig         +
 
-- Model
-- Cube
-- Pyramid
+- Model                 +
+- Cube                  +
+- Pyramid               +
 
-- Detail
-- Corner
-- Rib
-- Center
-- Corners
-- Ribs
-- Centers
+- Detail                +
+- Corner                +
+- Rib                   +
+- Center                +
+- Corners               +
+- Ribs                  +
+- Centers               +
 
-- Edge
-- Point
-- MatrixTransform
-- MatrixPlane
-- MatrixBody
-- Vector
-- Angle
+- Edge                  +
+- Point                 +
+- MatrixPlane           +
+- MatrixBody            +
+- Vector                +
+- Angle                 +
 
 2) Схемы алгоритмов:
 - алгоритм удаления нелицевых граней
@@ -35,3 +34,4 @@
 3) Сравнение по времени работы:
 - кубик на разных длинах
 - две головомки с размерностью 3
+- работа с тенями
