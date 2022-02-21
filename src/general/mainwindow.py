@@ -3,7 +3,7 @@ from PyQt5.QtCore import QRect, QPoint
 from PyQt5.QtGui import QColor, QRadialGradient, QBrush
 from PyQt5 import QtWidgets, QtCore
 
-from src.general.config import Config, get_colors, CUBE, PYRAMID, MEGAMINX
+from src.general.config import Config, get_colors, CUBE, PYRAMID
 from src.design.design import Ui_MainWindow
 from src.design.drawer import QtDrawer
 from src.models.models import Cube, Pyramid

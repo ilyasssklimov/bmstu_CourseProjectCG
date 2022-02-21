@@ -58,7 +58,7 @@ class Point:
         self.y = point.y + (self.y - point.y) * k
         self.z = point.z + (self.z - point.z) * k
 
-    def turn_ox(self, angle: int) -> None:
+    def turn_ox(self, angle: float) -> None:
         y, z = self.y, self.z
         self.y = y * cos_deg(angle) - z * sin_deg(angle)
         self.z = y * sin_deg(angle) + z * cos_deg(angle)

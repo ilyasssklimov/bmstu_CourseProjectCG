@@ -3,7 +3,7 @@ from src.utils.point import Point
 
 
 class MatrixPlane:
-    def __init__(self, vector: list[float]):
+    def __init__(self, vector: list[Point]):
         self.matrix = []
         point_1, point_2, general = vector[0], vector[1], vector[2]
 
