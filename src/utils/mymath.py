@@ -1,9 +1,10 @@
 import src.general.config as config
 from math import pi, sin, cos, sqrt
+import src.utils.point as p
 
 
 class Vector:
-    def __init__(self, start, finish):
+    def __init__(self, start, finish=None):
         if finish:
             self.x = finish.x - start.x
             self.y = finish.y - start.y
@@ -12,7 +13,7 @@ class Vector:
             self.x = start[0]
             self.y = start[1]
             self.z = start[2]
-        elif isinstance(start):
+        elif isinstance(start, p.Point | Vector):
             self.x = start.x
             self.y = start.y
             self.z = start.z

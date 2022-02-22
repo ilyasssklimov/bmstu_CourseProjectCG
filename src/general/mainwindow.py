@@ -70,8 +70,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.left_light_point = Config().left_light
 
     def set_connects_to_buttons(self):
-        self.mixButton.clicked.connect(self.mix_model)
-
         self.rotate_y_.clicked.connect(lambda: self.turn_model_oy(self.angle))
         self.rotate_y.clicked.connect(lambda: self.turn_model_oy(-self.angle))
         self.rotate_x.clicked.connect(lambda: self.turn_model_ox(self.angle))
@@ -146,9 +144,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.model.turn_ox(-30)
 
             self.update()
-
-    def mix_model(self) -> None:
-        print('Temporarily does\'not work :(')
 
     def paintEvent(self, event: PyQt5.QtGui.QPaintEvent) -> None:
         painter = QtDrawer()
