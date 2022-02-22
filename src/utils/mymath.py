@@ -1,10 +1,9 @@
 import src.general.config as config
-import src.utils.point as p
 from math import pi, sin, cos, sqrt
 
 
 class Vector:
-    def __init__(self, start: list | p.Point, finish: p.Point | None = None):
+    def __init__(self, start, finish):
         if finish:
             self.x = finish.x - start.x
             self.y = finish.y - start.y
@@ -13,7 +12,7 @@ class Vector:
             self.x = start[0]
             self.y = start[1]
             self.z = start[2]
-        elif isinstance(start, p.Point | Vector):
+        elif isinstance(start):
             self.x = start.x
             self.y = start.y
             self.z = start.z
@@ -53,7 +52,7 @@ class Vector:
     def get_length(self) -> float:
         return sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
-    def adjust(self, point_1: p.Point, point_2: p.Point) -> None:
+    def adjust(self, point_1, point_2) -> None:
         vector = Vector(point_1, point_2)
         scalar = scalar_multiplication(self, vector)
         cosine = scalar / (self.get_length() * vector.get_length())
