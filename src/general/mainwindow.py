@@ -76,7 +76,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.rotate_x_.clicked.connect(lambda: self.turn_model_ox(-self.angle))
         self.rotate_z.clicked.connect(lambda: self.turn_model_oz(self.angle))
         self.rotate_z_.clicked.connect(lambda: self.turn_model_oz(-self.angle))
-        # TODO: кастомизировать кнопки поворота
 
         self.right.clicked.connect(lambda: self.start_turning_side('R', 1))
         self.up.clicked.connect(lambda: self.start_turning_side('U', 1))
